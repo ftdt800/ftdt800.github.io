@@ -1,0 +1,1712 @@
+@font-face {
+    font-family: 'Mokoto';
+    src:
+        local("Mokoto"),
+        url('../fonts/mokoto-regular.otf') format('opentype');
+}
+
+/* --- АНИМАЦИИ И ЭФФЕКТЫ --- */
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(186, 169, 143, 0.7); }
+    50% { box-shadow: 0 0 20px rgba(186, 169, 143, 0.9); }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes slideInFromLeft {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInFromRight {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideInUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.9); opacity: 0; }
+}
+
+@keyframes colorCycle {
+    0% { color: #baa98f; }
+    25% { color: #a08f7a; }
+    50% { color: #8a7a6a; }
+    75% { color: #a08f7a; }
+    100% { color: #baa98f; }
+}
+
+@keyframes shine {
+    to { background-position: 200% center; }
+}
+
+@keyframes borderGlow {
+    0%, 100% { border-color: #baa98f; }
+    50% { border-color: #a08f7a; }
+}
+
+@keyframes textGlow {
+    0%, 100% { text-shadow: 0 0 5px rgba(186, 169, 143, 0.7); }
+    50% { text-shadow: 0 0 15px rgba(186, 169, 143, 0.9), 0 0 25px rgba(186, 169, 143, 0.6); }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes textShadowPulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(186, 169, 143, 0.7); }
+    50% { text-shadow: 0 0 20px rgba(186, 169, 143, 0.9), 0 0 30px rgba(186, 169, 143, 0.5); }
+}
+
+@keyframes borderPulse {
+    0%, 100% { box-shadow: 0 0 0 2px #baa98f; }
+    50% { box-shadow: 0 0 0 4px rgba(186, 169, 143, 0.5); }
+}
+
+
+@keyframes buttonHoverEffect {
+    from { background-position: 0 0; }
+    to { background-position: -200px 0; }
+}
+
+@keyframes priceGlow {
+    0%, 100% { color: #00ff88; text-shadow: 0 0 5px rgba(0, 255, 136, 0.3); }
+    50% { color: #00cc6a; text-shadow: 0 0 10px rgba(0, 255, 136, 0.6); }
+}
+
+@keyframes markerPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes markerGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(186, 169, 143, 0.7); }
+    50% { box-shadow: 0 0 15px rgba(186, 169, 143, 0.9); }
+}
+
+@keyframes sliderHoverGlow {
+    0%, 100% { box-shadow: 0 0 0 rgba(186, 169, 143, 0); }
+    to { box-shadow: 0 0 10px rgba(186, 169, 143, 0.5); }
+}
+
+@keyframes sliderActiveGlow {
+    0%, 100% { box-shadow: 0 0 0 rgba(186, 169, 143, 0); }
+    to { box-shadow: 0 0 15px rgba(186, 169, 143, 0.7); }
+}
+
+@keyframes configOptionHover {
+    from { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+    to { box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(186, 169, 143, 0.2); }
+}
+
+@keyframes configOptionSelected {
+    from { box-shadow: 0 0 0 2px rgba(186, 169, 143, 0); }
+    to { box-shadow: 0 0 0 2px #baa98f; }
+}
+
+@keyframes stepDotHover {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
+
+@keyframes stepDotActive {
+    from { background-color: #444; }
+    to { background-color: #baa98f; }
+}
+
+@keyframes finalPriceHover {
+    from { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+    to { box-shadow: 0 8px 30px rgba(186, 169, 143, 0.4); }
+}
+
+@keyframes finalPriceInnerHover {
+    from { background: #222; }
+    to { background: linear-gradient(135deg, #2c2c2c 0%, #1c1c1c 100%); }
+}
+
+@keyframes modalContentHover {
+    from { border-color: #baa98f; }
+    to { border-color: #a08f7a; }
+}
+
+@keyframes closeHover {
+    from { color: #aaa; }
+    to { color: #baa98f; }
+}
+
+@keyframes notificationHover {
+    from { transform: translateX(-50%) scale(1); }
+    to { transform: translateX(-50%) scale(1.05); }
+}
+
+.modelD-3d{
+    border: 1px solid #baa98f;;
+    border-radius: 8px;
+    animation: float 6s ease-in-out infinite;
+}
+
+.modelM-3d{
+    border: 1px solid #baa98f;;
+    border-radius: 8px;
+    animation: float 6s ease-in-out infinite;
+}
+
+#model-container {
+    display: none; /* Скрываем 3D модель по умолчанию */
+}
+
+#modelM-static-image-container {
+    position: relative;
+    width: 100%;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #222222;
+    border-radius: 8px;
+    overflow: hidden;
+    animation: fadeIn 1s ease-out;
+}
+
+#static-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: opacity 0.3s ease-in-out; /* Добавлена анимация прозрачности */
+}
+
+#static-image.changing {
+    opacity: 0.5; /* Состояние во время смены изображения */
+}
+
+/*-----3d model modal start-----*/
+.view-3d-button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #baa98f;
+    color: #000000;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    animation: pulse 2s infinite;
+    z-index: 5; /* Выше маркеров */
+}
+
+.view-3d-button:hover {
+    background-color: #a08f7a;
+    box-shadow: 0 8px 25px rgba(186, 169, 143, 0.4);
+}
+
+/* Стили для нового модального окна с 3D моделью */
+.modal-3d-view {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed;
+    z-index: 1001; /* Убедимся, что оно поверх других модальных окон */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.modal-3d-content {
+    background-color: #111111;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #baa98f;
+    width: 90%;
+    max-width: 800px;
+    position: relative;
+    border-radius: 10px;
+    animation: slideInUp 0.5s ease-out;
+}
+
+.close-3d-modal {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #baa98f;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-3d-modal:hover,
+.close-3d-modal:focus {
+    color: #a08f7a;
+    text-decoration: none;
+    animation: bounce 0.5s;
+}
+
+#modal-model-container {
+    width: 100%;
+    height: 500px;
+    background-color: #222222;
+}
+/*-----3d model modal end-----*/
+.modelD-breadcrumb-text h3 {
+    font-family: Mokoto, 'Mokoto Glitch', sans-serif;
+	color: #5c5c5c;
+	font-weight: 700;
+}
+
+.modelD-text h2 {
+  font-family: Mokoto, 'Mokoto Glitch', sans-serif;
+  font-size: 30px;
+  animation: textGlow 3s infinite alternate;
+}
+
+.modelD-text a {
+   color: #111111;
+}
+
+.modelD-text a:hover {
+   color: #FFFFFF;
+}
+
+.modelD-section {
+	background: #222222;
+	padding-bottom: 0;
+}
+
+.modelD-section .section-title {
+	margin-bottom: 10px;
+}
+
+.modelD-section h2 {
+	font-family: Mokoto, 'Mokoto Glitch', sans-serif;
+	font-size: 60px;
+	font-weight: 400;
+	letter-spacing: 0.05em;
+	color: #ffffff;
+	text-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+    animation: textShadowPulse 4s infinite alternate;
+}
+
+.modelD-item {
+	text-align: center;
+	background: #222222;
+	padding: 46px 50px 0;
+	height: 425px;
+	-webkit-transition: all 0.3s;
+	-o-transition: all 0.3s;
+	transition: all 0.3s;
+	margin-bottom: 20px;
+	color:  #baa98f;;
+}
+
+.modelD-item:hover {
+	border-bottom: 3px solid ;
+}
+
+.modelD-item table {
+    width: 100%; /* Таблица растягивается на всю ширину */
+    border-collapse: collapse; /* Убирает промежутки между ячейками */
+    border: 2px solid #baa98f;; /* Внешняя граница таблицы */
+    color:  #ffffff;
+}
+
+.modelD-item th, .service-item td {
+    border: 1px solid #baa98f;;/* Границы внутри таблицы */
+    color:  #ffffff;
+    padding: 10px; /* Внутренние отступы */
+    text-align: center; /* Центрирование текста */
+}
+
+.modelD-item p {
+    text-align: left;
+    color: #ffffff;
+}
+
+.modelD-item ul {
+    text-align: left;
+    padding: 0px 10px;
+}
+
+
+/* Стили для центрирования конфигурации на странице modelL */
+.as-text.modelD-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+
+/* --- Стили для конфигуратора (исправленные и упрощенные) --- */
+/* Общие стили для конфигуратора */
+.configuration {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #baa98f;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin-top: 30px;
+    position: relative; /* Для позиционирования внутренних элементов */
+    animation: fadeIn 0.8s ease-out;
+    overflow: hidden; /* Чтобы анимации не выходили за границы */
+
+    margin: auto 0; /* Автоматические отступы сверху и снизу */
+}
+
+.configuration h5 {
+    color: #baa98f;
+    font-weight: 700;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+    text-align: center;
+    font-size: 16px;
+    animation: colorCycle 5s infinite;
+    position: relative;
+}
+
+.configuration h5::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #baa98f, transparent);
+    animation: gradientShift 3s infinite;
+}
+
+/* Индикатор шагов */
+.steps-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.step-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #444;
+    border: 2px solid #666;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    animation: pulse 3s infinite;
+}
+
+.step-dot:hover {
+    animation: stepDotHover 0.3s forwards;
+}
+
+.step-dot.active {
+    animation: stepDotActive 0.3s forwards, glow 2s infinite;
+    background-color: #1a1a1a;
+    border-color: #baa98f;
+    box-shadow: 0 0 8px rgba(186, 169, 143, 0.7);
+    transform: scale(1.2);
+}
+
+
+/* --- Начало стилей для визуальной подсказки --- */
+.step-1-prompt {
+    position: absolute;
+    top: 50%; /* Центрируем приблизительно по вертикали */
+    left: 50%; /* Центрируем приблизительно по горизонтали */
+    transform: translate(-50%, -50%); /* Точное центрирование */
+    font-size: 32px; /* Размер символа пальца */
+    color: #baa98f; /* Цвет, соответствующий премиальному стилю */
+    z-index: 5; /* Выше, чем основные элементы, но ниже модальных окон */
+    pointer-events: none; 
+    opacity: 0; /* Сначала скрыт */
+    /* Анимации */
+    animation: promptFadeIn 1s ease-out 0.5s forwards, promptWiggle 1.5s ease-in-out infinite 2s;
+}
+
+/* Анимация появления */
+@keyframes promptFadeIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Анимация "покачивания" пальца */
+@keyframes promptWiggle {
+    0%, 100% { transform: translate(-50%, -50%) rotate(-10deg); }
+    50% { transform: translate(-50%, -50%) rotate(10deg); }
+}
+
+/* Анимация "нажатия" пальца */
+@keyframes promptTap {
+    0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(-10deg); }
+    50% { transform: translate(-50%, -50%) scale(0.8) rotate(-10deg); }
+}
+
+/* Класс для активации анимации "нажатия" */
+.step-1-prompt.tap {
+    animation: promptTap 0.3s ease-in-out, promptWiggle 1.5s ease-in-out infinite 0.3s;
+}
+/* --- Конец стилей для визуальной подсказки --- */
+
+/* Заголовки шагов */
+.config-step h6 {
+    color: #FFFFFF;
+    font-weight: 600;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+    position: relative;
+    padding-bottom: 10px;
+    font-size: 18px;
+    text-align: center;
+    animation: slideInDown 0.5s ease-out;
+}
+
+.config-step h6::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #baa98f, transparent);
+    animation: gradientShift 3s infinite;
+}
+
+/* Стили для вариантов конфигурации */
+.config-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.config-option {
+    background: #252525;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 25px 15px;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease; /* Упрощенная анимация */
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: slideInUp 0.4s ease-out;
+}
+
+.config-option:hover {
+   
+    border-color: #baa98f;
+}
+
+.config-option input[type="radio"]:checked + .icon-circle,
+.config-option input[type="checkbox"]:checked + .icon-circle {
+    border-color: #baa98f;
+    box-shadow: 0 0 0 3px rgba(186, 169, 143, 0.3);
+}
+
+.config-option input[type="radio"]:checked ~ p,
+.config-option input[type="checkbox"]:checked ~ p {
+    color: #baa98f;
+    animation: colorCycle 3s infinite;
+}
+
+.config-option.selected {
+    animation: configOptionSelected 0.3s forwards;
+    background: rgba(186, 169, 143, 0.1);
+    border-color: #baa98f;
+    box-shadow: 0 0 0 2px #baa98f;
+}
+
+.icon-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #222222;
+    border: 2px solid transparent;
+    
+    position: relative;
+    overflow: hidden;
+}
+
+.icon-circle img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+    filter: grayscale(30%); /* Небольшое обесцвечивание по умолчанию */
+    transition: filter 0.3s ease; /* Плавный переход фильтра */
+}
+
+.config-option:hover .icon-circle img,
+.config-option.selected .icon-circle img {
+    filter: grayscale(0%);
+    animation: iconHoverGlow 0.3s forwards; /* Анимация при наведении/выборе */
+}
+
+.config-option p {
+    color: #fff;
+    margin-top: 10px;
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+/* Стили для цены и кнопки */
+.config-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    border-top: 1px solid #333;
+    padding-top: 20px;
+}
+
+.buy-button, .next-step, .prev-step {
+    background: linear-gradient(135deg, #baa98f 0%, #a08f7a 100%);
+    background-size: 200% 100%;
+    border: none;
+    color: #000;
+    font-weight: 700;
+    padding: 12px 30px;
+    border-radius: 8px; /* Возвращаем скругление 8px */
+    cursor: pointer;
+    transition: all 0.3s ease, background-position 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(186, 169, 143, 0.3);
+    position: relative;
+    overflow: hidden;
+    font-size: 0.9rem;
+    
+}
+
+.buy-button:hover, .next-step:hover, .prev-step:hover {
+    animation: none; /* Отключаем pulse на hover */
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(186, 169, 143, 0.4);
+    color: #000;
+    background-position: 100% 0; /* Анимация градиента */
+}
+
+/* Эффект скользящего света на кнопках */
+.buy-button::after, .next-step::after, .prev-step::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(25deg);
+    transition: all 0.6s;
+    z-index: 1;
+}
+
+.buy-button:hover::after, .next-step:hover::after, .prev-step:hover::after {
+    left: 140%;
+}
+
+.prev-step {
+    background: transparent;
+    border: 1px solid #baa98f;
+    color: #baa98f;
+    background-image: none; /* Убираем градиент для prev-step */
+}
+
+.prev-step:hover {
+    background: #baa98f;
+    color: #000;
+}
+
+/* Стили для иконок информации */
+.option-wrapper {
+    position: relative;
+}
+
+/* Стили для цены */
+.option-price {
+    font-weight: bold;
+    color: #00ff88;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+    animation: priceGlow 2s infinite alternate;
+}
+
+.price-note {
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* Стили для финального отображения цены */
+.final-price-display {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 2px;
+    margin: 30px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.6s ease-out;
+    transition: box-shadow 0.3s ease;
+}
+
+.final-price-inner {
+    background: #222;
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    transition: background 0.3s ease;
+}
+
+.final-price-display:hover .final-price-inner {
+    animation: finalPriceInnerHover 0.3s forwards;
+}
+
+.final-price {
+    background: rgba(186, 169, 143, 0.1);
+    border: 1px solid #baa98f;
+    border-radius: 8px;
+    padding: 20px;
+    animation: glow 3s infinite alternate;
+}
+
+.final-price .price-label {
+    font-size: 15px;
+    color: #b3b3b3;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    animation: colorCycle 4s infinite;
+}
+
+.final-price .price-value h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #baa98f;
+    font-family: 'Mokoto', 'Mokoto Glitch', sans-serif; 
+    margin: 0;
+    text-shadow: 0 0 10px rgba(186, 169, 143, 0.7);
+    animation: textShadowPulse 2s infinite alternate;
+}
+
+.price-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #baa98f, transparent);
+    margin: 15px auto;
+    width: 70%;
+    animation: gradientShift 3s infinite;
+}
+
+.final-price .price-note {
+    font-size: 0.9rem;
+    color: #b3b3b3;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+
+/* Стили для цен в строке заказа */
+.configuration-details .item-price {
+    color: #00cc6a; /* Яркий зелёный цвет для цены */
+    font-size: 0.85rem; /* Меньше размер шрифта */
+    font-weight: normal; /* Обычный (не жирный) шрифт */
+    opacity: 0.9; /* Немного прозрачности */
+    margin-left: 5px; /* Небольшой отступ слева от основного текста */
+    text-shadow: 0 0 2px rgba(0, 204, 106, 0.3); /* Лёгкая тень для выделения */
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    .configuration-details .item-price {
+        font-size: 0.8rem; /* Ещё меньше на мобильных */
+        margin-left: 3px; /* Меньше отступ */
+    }
+}
+
+/* Стили для маркеров на изображении */
+/* Класс для активных маркеров */
+.config-marker.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Каждый маркер будет позиционироваться по вертикали относительно другого */
+.config-marker {
+    position: absolute;
+    /* top будет задаваться динамически в JavaScript или через классы CSS */
+    top: 10px; /* Значение по умолчанию, будет переопределено */
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #baa98f;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #baa98f;
+    width: fit-content;
+    z-index: 10;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.3s ease, transform 0.3s ease, top 0.3s ease;
+    animation: markerPulse 2s infinite alternate, markerGlow 3s infinite alternate;
+}
+
+/* Классы для позиционирования маркеров по вертикали */
+/* Эти классы будут добавляться JavaScript-ом */
+.config-marker.spine-marker-position {
+    top: 10px;
+}
+
+.config-marker.material-marker-position {
+    top: 50px; /* Примерно 40px ниже предыдущего */
+}
+
+.config-marker.module-marker-position {
+    top: 90px; /* Примерно 40px ниже предыдущего */
+}
+
+.config-marker.soft-parts-marker-position {
+    top: 130px; /* Примерно 40px ниже предыдущего */
+}
+
+.config-marker.waist-size-marker-position {
+    top: 170px; /* Примерно 40px ниже предыдущего */
+}
+
+.config-marker.soft-color-marker-position {
+    top: 170px; /* Исправлено позиционирование */
+}
+
+/* Ползунок охвата талии */
+#waist-size-selector {
+    background: rgba(40, 40, 40, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    border: 1px solid #444;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    animation: slideInUp 0.5s ease-out;
+}
+
+#waist-size-selector h6 {
+    color: #baa98f;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.1rem;
+    animation: colorCycle 4s infinite;
+}
+
+#waistSizeSlider {
+    accent-color: #baa98f; /* Цвет ползунка */
+    height: 8px;
+    border-radius: 5px;
+    background: #333;
+    outline: none;
+    width: 100%;
+    transition: box-shadow 0.3s ease;
+}
+
+#waistSizeSlider:hover {
+    animation: sliderHoverGlow 0.3s forwards;
+}
+
+#waistSizeSlider:active {
+    animation: sliderActiveGlow 0.3s forwards;
+}
+
+/* Стили для "большого пальца" ползунка */
+#waistSizeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #baa98f;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(186, 169, 143, 0.8);
+    transition: all 0.2s ease;
+}
+
+#waistSizeSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(186, 169, 143, 1);
+}
+
+#waistSizeSlider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #baa98f;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(186, 169, 143, 0.8);
+    border: none;
+    transition: all 0.2s ease;
+}
+
+#waistSizeSlider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(186, 169, 143, 1);
+}
+
+#waistSizeDisplay {
+    color: #baa98f;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(186, 169, 143, 0.5);
+    animation: textGlow 2s infinite alternate;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    .configuration {
+        padding: 25px 20px;
+        margin-top: 25px;
+    }
+    .configuration h5 {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+    }
+    .steps-indicator {
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+    .step-dot {
+        width: 13px;
+        height: 13px;
+    }
+    .config-step h6 {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+    }
+    .config-options {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    .config-option {
+        padding: 20px 15px;
+    }
+    .icon-circle {
+        width: 90px;
+        height: 90px;
+    }
+    .final-price-display {
+        margin: 25px 0;
+    }
+    .final-price-inner {
+        padding: 20px;
+    }
+    .final-price {
+        padding: 15px;
+    }
+    .final-price .price-value h3 {
+        font-size: 2.2rem;
+    }
+    .buy-button, .next-step, .prev-step {
+        padding: 12px 25px;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+    }
+    .config-footer {
+        flex-direction: column;
+        gap: 15px;
+        padding-top: 15px;
+    }
+    .config-marker {
+        font-size: 13px;
+        padding: 4px 8px;
+        top: 8px;
+        left: 8px;
+    }
+    #waist-size-selector {
+        padding: 15px;
+    }
+    #waistSizeSlider {
+        height: 6px;
+    }
+    #waistSizeSlider::-webkit-slider-thumb {
+        width: 20px;
+        height: 20px;
+    }
+    #waistSizeSlider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .configuration {
+        padding: 20px 15px;
+    }
+    .configuration h5 {
+        font-size: 1.3rem;
+    }
+    .config-option {
+        padding: 15px 10px;
+    }
+    .icon-circle {
+        width: 80px;
+        height: 80px;
+    }
+    .config-option p {
+        font-size: 0.9rem;
+    }
+    .final-price .price-value h3 {
+        font-size: 2rem;
+    }
+    .final-price .price-label {
+        font-size: 1rem;
+    }
+    .buy-button, .next-step, .prev-step {
+        padding: 10px 20px;
+        font-size: 0.8rem;
+    }
+}
+
+/* --- Конец стилей конфигуратора --- */
+/* Стили для модального окна */
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed;
+    z-index: 1002; /* Выше 3D модального */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #111111;;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #baa98f;
+    width: 80%; /* Можно изменить ширину */
+    max-width: 600px;
+    border-radius: 10px;
+    transition: border-color 0.3s ease;
+}
+
+
+/* --- Стили для модального окна (адаптивность) --- */
+
+/* Убедимся, что модальное окно корректно адаптируется */
+#orderModal .modal-content {
+  /* max-width: 95vw; - можно добавить, если нужно */
+  margin: 1rem auto; /* Отступы сверху/снизу */
+  /* height: auto; - по умолчанию */
+  max-height: 90vh; /* Максимальная высота 90% от высоты экрана */
+  overflow: auto; /* Добавляем общий скролл, если содержимое не помещается */
+  background-color: #1e1e1e;
+  color: #dcdcdc;
+  border-radius: 10px;
+  border: 1px solid #333;
+  /* Убираем фиксированную ширину, чтобы оно адаптировалось */
+  width: auto; /* или width: 90%; для фиксированного % ширины */
+  max-width: 600px; /* Оставим максимальную ширину для десктопа */
+}
+
+/* Адаптивность для экранов шириной до 768px */
+@media (max-width: 768px) {
+  #orderModal .modal-content {
+    margin: 0.5rem auto; /* Уменьшаем внешние отступы */
+    width: 95%; /* Занимает почти всю ширину экрана */
+    max-height: 95vh; /* Увеличиваем максимальную высоту */
+  }
+
+  /* Уменьшаем размер шрифта для всего содержимого модального окна */
+  #orderModal .bd-text,
+  #orderModal .blog-author,
+  #orderModal .leave-comment,
+  #orderModal .configuration-details,
+  #orderModal .comment-form {
+    font-size: 0.9rem; /* Уменьшаем общий размер шрифта */
+  }
+
+  /* Уменьшаем размер шрифта для заголовков */
+  #orderModal h5,
+  #orderModal h2,
+  #orderModal h3 {
+    font-size: 1rem; /* Уменьшаем размер заголовков */
+  }
+
+  /* Уменьшаем размер шрифта для отображения конфигурации */
+  #orderModal #selected-configuration {
+    font-size: 0.85rem; /* Уменьшаем размер шрифта конфигурации */
+    line-height: 1.4; /* Улучшаем читаемость */
+  }
+
+  /* Уменьшаем внутренние отступы формы */
+  #orderModal .leave-comment {
+    padding: 0.75rem; /* Уменьшаем отступы */
+  }
+
+  /* Уменьшаем размер шрифта для полей ввода */
+  #orderModal input[type="text"],
+  #orderModal textarea {
+    font-size: 0.85rem; /* Уменьшаем размер шрифта в полях */
+    padding: 0.5rem 0.75rem; /* Внутренние отступы */
+  }
+
+  /* Уменьшаем размер шрифта для кнопки */
+  #orderModal .site-btn {
+    font-size: 0.9rem; /* Уменьшаем размер шрифта кнопки */
+    padding: 0.75rem 1rem; /* Внутренние отступы */
+  }
+
+  /* Убедимся, что поля ввода занимают всю ширину колонки */
+  #orderModal .comment-form .row > div {
+    padding-left: 0.5rem; /* Убираем или уменьшаем отступы от Bootstrap сетки, если нужно */
+    padding-right: 0.5rem;
+  }
+
+  #orderModal .comment-form input,
+  #orderModal .comment-form textarea {
+    width: 100%; /* Поля ввода занимают всю ширину */
+    box-sizing: border-box; /* Включаем padding и border в ширину */
+    /* Убираем text-overflow: ellipsis; - чтобы текст был виден целиком */
+    text-overflow: clip; /* Отменяем обрезание текста */
+    white-space: nowrap; /* Позволяем тексту прокручиваться внутри поля */
+    overflow: hidden; /* Скрываем переполнение */
+  }
+
+  /* При фокусе на поле ввода */
+  #orderModal .comment-form input:focus,
+  #orderModal .comment-form textarea:focus {
+    white-space: normal; /* Разрешаем перенос строк при фокусе для редактирования */
+    overflow: auto; /* Показываем прокрутку, если текст длинный */
+  }
+
+  /* Уменьшаем размер иконок соцсетей, если нужно */
+  #orderModal .bt-social a i {
+    font-size: 1.1rem; /* Уменьшаем размер иконок */
+  }
+}
+
+/* Общие стили для полей ввода в модальном окне */
+#orderModal input[type="text"],
+#orderModal textarea {
+  width: 100%; /* Занимают всю ширину родителя */
+  padding: 0.6rem 0.8rem; /* Внутренние отступы */
+  border: 1px solid #444; /* Граница поля */
+  border-radius: 4px; /* Скругление */
+  background-color: #333; /* Фон поля */
+  color: #dcdcdc; /* Цвет текста */
+  /* font-size уже задан через @media */
+  box-sizing: border-box; /* Включаем padding и border в ширину */
+  /* Убираем text-overflow: ellipsis; - чтобы текст был виден целиком */
+  text-overflow: clip; /* Отменяем обрезание текста */
+  white-space: nowrap; /* Позволяем тексту прокручиваться внутри поля */
+  overflow: hidden; /* Скрываем переполнение */
+}
+
+/* При фокусе на поле ввода */
+#orderModal input[type="text"]:focus,
+#orderModal textarea:focus {
+  outline: 1px solid #baa98f; /* Обводка при фокусе */
+  white-space: normal; /* Разрешаем перенос строк при фокусе для редактирования */
+  overflow: auto; /* Показываем прокрутку, если текст длинный */
+}
+
+/* Кнопка отправки */
+#orderModal .site-btn {
+  width: 100%; /* Кнопка занимает всю ширину */
+  padding: 0.8rem 1.2rem; /* Внутренние отступы */
+  font-size: 1rem; /* Размер шрифта кнопки */
+  background-color: #baa98f; /* Цвет фона кнопки */
+  border: none; /* Убираем границу */
+  border-radius: 4px; /* Скругление */
+  color: #111; /* Цвет текста кнопки */
+  cursor: pointer; /* Курсор указателя */
+  transition: background-color 0.3s ease; /* Плавный переход цвета */
+  margin-top: 1rem; /* Отступ сверху */
+}
+
+#orderModal .site-btn:hover {
+  background-color: #d4c7ad; /* Цвет фона кнопки при наведении */
+}
+
+/* --- Конец стилей для модального окна --- */
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    animation: closeHover 0.3s forwards;
+    text-decoration: none;
+}
+
+/* Стили для уведомления */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4caf50; /* Зеленый цвет для успеха */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1003;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease;
+}
+
+/* Стили для уведомления об ошибке */
+.error {
+    background-color: #f44336; /* Красный цвет для ошибки */
+}
+
+/* Стили для нейтрального уведомления */
+.neutral {
+    background-color: #baa98f; /* Серый цвет для нейтрального уведомления */
+    color: black;
+}
+
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.notification:hover {
+    animation: notificationHover 0.3s forwards;
+}
+
+/* Стили для маркеров на изображении */
+.markers-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.image-marker {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #baa98f;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #baa98f;
+    width: fit-content;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column; /* Логотип и текст друг под другом */
+        text-align: center; /* Выравнивание текста по центру */
+    }
+    .footer-logo {
+        margin-bottom: 15px; /* Отступ между логотипом и текстом */
+    }
+}
+
+@media only screen and (max-width: 479px) {
+    .modelD-text h2 {
+        font-size: 20px;
+    }
+    .modelD-item th, .service-item td {
+        padding: 4px;
+        font-size: 12px;
+    }
+    .current-price p {
+        font-size: 12px;
+    }
+    .buy-button{
+        font-size: 12px;
+      }
+      .view-3d-button {
+        font-size: 12px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+/*----------------------------------------*/
+/* Gallery Grid Layout 
+/*----------------------------------------*/
+
+.gallery-section {
+    background: #191919;
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin: 0 auto;
+    max-width: 1400px;
+    padding: 0 15px;
+}
+
+/*----------------------------------------*/
+/* Gallery Items (Large Square 1:1 Ratio)
+/*----------------------------------------*/
+
+.gallery-item {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: galleryItemAppear 0.6s ease-out forwards;
+}
+
+.gallery-single-item {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%; /* Создаем квадрат 1:1 */
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    border: 2px solid transparent;
+}
+
+.gallery-single-item:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    border-color: #baa98f;
+}
+
+.gallery-single-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 30%, rgba(0, 0, 0, 0.9) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.gallery-single-item:hover::before {
+    opacity: 1;
+}
+
+.gallery-single-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.7s ease;
+    z-index: 2;
+}
+
+.gallery-single-item:hover::after {
+    left: 100%;
+}
+
+.gallery-item-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 25px;
+    z-index: 3;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+}
+
+.gallery-single-item:hover .gallery-item-info {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gallery-item-info h5 {
+    font-family: 'Mokoto', 'Mokoto Glitch', sans-serif;
+    font-size: 21px;
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.gallery-item-info p {
+    font-size: 15px;
+    color: #d3d3d3;
+    margin-bottom: 15px;
+    line-height: 1.5;
+    max-height: 4.5em;
+    overflow: hidden;
+}
+
+.gallery-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.gallery-tags .tag {
+    font-size: 11px;
+    color: #baa98f;
+    background: rgba(186, 169, 143, 0.15);
+    padding: 5px 12px;
+    border-radius: 15px;
+    border: 1px solid rgba(186, 169, 143, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.gallery-single-item:hover .gallery-tags .tag {
+    background: rgba(186, 169, 143, 0.25);
+    border-color: rgba(186, 169, 143, 0.7);
+    color: #fff;
+}
+
+/* Magnific Popup Customization */
+.mfp-bg {
+    background: rgba(0, 0, 0, 0.97);
+    z-index: 1042;
+}
+
+.mfp-wrap {
+    z-index: 1043;
+}
+
+.mfp-image-holder .mfp-content {
+    max-width: 95%;
+    max-height: 95vh;
+}
+
+.mfp-figure:after {
+    box-shadow: none;
+    background: transparent;
+}
+
+.mfp-figure small {
+    color: #b3b3b3;
+    font-size: 16px;
+    margin-top: 15px;
+    display: block;
+    text-align: center;
+}
+
+.mfp-title {
+    text-align: center;
+    padding: 15px 25px;
+    font-size: 18px;
+    line-height: 1.4;
+}
+
+/*----------------------------------------*/
+/* 4. Animations
+/*----------------------------------------*/
+
+@keyframes galleryItemAppear {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.gallery-item:nth-child(1) { animation-delay: 0.1s; }
+.gallery-item:nth-child(2) { animation-delay: 0.2s; }
+.gallery-item:nth-child(3) { animation-delay: 0.3s; }
+.gallery-item:nth-child(4) { animation-delay: 0.4s; }
+.gallery-item:nth-child(5) { animation-delay: 0.5s; }
+.gallery-item:nth-child(6) { animation-delay: 0.6s; }
+.gallery-item:nth-child(7) { animation-delay: 0.7s; }
+.gallery-item:nth-child(8) { animation-delay: 0.8s; }
+.gallery-item:nth-child(9) { animation-delay: 0.9s; }
+.gallery-item:nth-child(10) { animation-delay: 1.0s; }
+
+/* Анимация градиентной линии */
+@keyframes gradientShift {
+    0% { background-position: -100% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Улучшенные hover эффекты */
+.gallery-single-item {
+    will-change: transform;
+}
+
+/* Гарантия что фото не искажаются */
+.gallery-single-item {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+@media (max-width: 1400px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        max-width: 1200px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 18px;
+    }
+    
+    .gallery-item-info h5 {
+        font-size: 20px;
+    }
+    
+    .gallery-item-info p {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 992px) {
+    .gallery-hero-section .section-title h2 {
+        font-size: 40px;
+    }
+    
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+    }
+    
+    .gallery-item-info {
+        padding: 20px;
+    }
+    
+    .gallery-item-info h5 {
+        font-size: 18px;
+    }
+}
+
+
+
+@media (max-width: 768px) {
+      
+    .about-us-section .col-lg-6:first-child {
+        order: 2; /* Блок с фото становится вторым */
+            }
+    .breadcrumb-section {
+        display: none;
+    }
+    
+    .about-us-section .col-lg-6:last-child {
+        order: 1; /* Блок с текстом и конфигуратором становится первым */
+	padding-bottom: 20px;
+    }
+    .about-us-section.spad {
+        padding-top: 0; /* Убираем отступ сверху */
+    }
+
+}
+
+@media (max-width: 768px) {
+    .gallery-hero-section {
+        padding-top: 60px;
+        padding-bottom: 30px;
+    }
+    
+    .gallery-hero-section .section-title h2 {
+        font-size: 32px;
+    }
+    
+    .gallery-hero-section .section-title p {
+        font-size: 16px;
+    }
+    
+    .gallery-section {
+        padding-top: 30px;
+        padding-bottom: 50px;
+    }
+    
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 15px;
+    }
+    
+    .gallery-item-info {
+        padding: 18px;
+    }
+    
+    .gallery-item-info h5 {
+        font-size: 15px;
+    }
+    
+    .gallery-item-info p {
+        font-size: 13px;
+    }
+    
+    .gallery-tags .tag {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+}
+
+@media (max-width: 640px) {
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .gallery-item-info {
+        padding: 15px;
+    }
+    
+
+    
+    .gallery-item-info p {
+        font-size: 12px;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+    
+    .gallery-tags .tag {
+        font-size: 9px;
+        padding: 3px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery-hero-section .section-title h2 {
+        font-size: 28px;
+    }
+    
+    .gallery-hero-section .section-title span {
+        font-size: 14px;
+    }
+    
+    .gallery-grid {
+        grid-template-columns: 1fr;
+        max-width: 350px;
+        margin: 0 auto;
+        gap: 15px;
+    }
+    
+    .gallery-single-item {
+        border-radius: 10px;
+    }
+    
+    .gallery-item-info {
+        padding: 20px;
+    }
+    
+  
+    
+    .gallery-item-info p {
+        font-size: 14px;
+    }
+}
+
+/* Оптимизация для высоких экранов */
+@media (min-height: 800px) and (min-width: 1200px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+    }
+    
+  
+    
+    .gallery-item-info p {
+        font-size: 16px;
+    }
+}
+
+/* Оптимизация для очень широких экранов */
+@media (min-width: 1600px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 30px;
+        max-width: 1600px;
+    }
+}
+
+/* Эффект при клике */
+.gallery-single-item:active {
+    transform: scale(0.98);
+}
+
+/* Улучшение контраста для текста на фоне */
+.gallery-item-info {
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+    padding-top: 50px;
+}

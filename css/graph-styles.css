@@ -1,0 +1,789 @@
+/*----------------------------------------*/
+/* Graph Page Styles
+/*----------------------------------------*/
+
+/* Стили для секции с графиком */
+.graph-section {
+    background: #191919;
+    padding: 60px 0;
+}
+
+.graph-section h4 {
+    font-family: Mokoto, 'Mokoto Glitch', sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+}
+
+/* Стили для формы */
+#inputForm {
+    background: #222222;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+}
+
+#inputForm label {
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: block;
+}
+
+#inputForm input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    color: #ffffff;
+    background: #393939;
+    border: 1px solid #707070;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+#inputForm #pneumaticForm input[type="number"]:focus {
+    border-color: #baa98f;
+    outline: none;
+}
+
+#inputForm button {
+    font-size: 16px;
+    color: #000000;
+    background: #baa98f;
+    border: none;
+    padding: 12px 30px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+#inputForm button:hover {
+    background: #a08f76;
+}
+
+/* Стили для графика */
+
+
+.chart-container {
+    background: #222222;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+/* Стили для осей графика */
+.chartjs-render-monitor {
+    color: #ffffff;
+}
+
+/* Стили для подписей осей */
+.chartjs-render-monitor .chartjs-grid-line {
+    stroke: #707070;
+}
+
+.chartjs-render-monitor .chartjs-tick {
+    color: #ffffff;
+}
+
+/* Стили для легенды */
+.chartjs-legend {
+    color: #ffffff;
+}
+
+
+/* Стили для блока с результатами */
+.calculation-results {
+    background: #222222;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.calculation-results h3 {
+    font-family: Mokoto, 'Mokoto Glitch', sans-serif;
+    font-size: 20px;
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.calculation-results p {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin-bottom: 10px;
+}
+
+.calculation-results strong {
+    color: #baa98f;
+    font-weight: 700;
+}
+
+/* Стили для секции с пневмоцилиндром */
+.pneumatic-section {
+    background: #191919;
+    padding: 60px 0;
+}
+
+.pneumatic-section h2 {
+    font-family: Mokoto, 'Mokoto Glitch', sans-serif;
+    font-size: 24px;
+    color: #ffffff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Стили для формы */
+#pneumaticForm {
+    background: #222222;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+}
+
+#pneumaticForm {
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: block;
+}
+
+#pneumaticForm input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    color: #ffffff;
+    background: #393939;
+    border: 1px solid #707070;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+#pneumaticForm #pneumaticForm input[type="number"]:focus {
+    border-color: #baa98f;
+    outline: none;
+}
+
+#pneumaticForm button {
+    font-size: 16px;
+    color: #000000;
+    background: #baa98f;
+    border: none;
+    padding: 12px 30px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+#pneumaticForm button:hover {
+    background: #a08f76;
+}
+
+
+
+/* Контейнер с описанием */
+.info-container {
+    background: #222222;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.info-container h3 {
+    font-family: Mokoto, 'Mokoto Glitch', sans-serif;
+    font-size: 20px;
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.info-container p {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin-bottom: 15px;
+}
+
+.info-container ul {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.info-container ul li {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin-bottom: 5px;
+}
+
+.info-container strong {
+    color: #baa98f;
+    font-weight: 700;
+}
+
+
+#rankingSection {
+    background: #191919; /* Основной фон секции */
+    padding: 60px 0; /* Отступы сверху и снизу */
+}
+
+#rankingSection h2 {
+    font-family: 'Mokoto', 'Mokoto Glitch', sans-serif;
+    font-size: 60px;
+    font-weight: 200;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 40px;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+}
+
+/* Стили для таблицы */
+#rankingTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    background: #222222; /* Фон таблицы */
+    border-radius: 8px; /* Скругление углов */
+    overflow: hidden; /* Скрываем выходящие за пределы элементы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Тень */
+    display: block; /* Блочное отображение для прокрутки */
+    overflow-x: auto;
+}
+
+#rankingTable th,
+#rankingTable td {
+    padding: 16px;
+    text-align: center;
+    border-bottom: 1px solid #191919; /* Разделительные линии */
+    color: #b3b3b3;; /* Цвет текста */
+    font-family: 'Libre Franklin', sans-serif;
+    font-size: 10px;
+}
+
+#rankingTable th {
+    background: #222222; /* Цвет заголовков */
+    color: #ffffff;; /* Цвет текста в заголовках */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#rankingTable th:hover {
+    background: #baa98f; /* Цвет при наведении на заголовок */
+}
+
+#rankingTable tbody tr {
+    transition: background 0.3s ease;
+}
+
+#rankingTable tbody tr:hover {
+    background: #2a2a2a; /* Цвет при наведении на строку */
+}
+
+#rankingTable tbody tr:nth-child(even) {
+    background: #1f1f1f; /* Чередующийся фон строк */
+}
+
+/* Запретить выделение текста в таблице */
+#rankingTable {
+    user-select: none; /* Стандартное свойство */
+    -webkit-user-select: none; /* Для старых версий Chrome и Safari */
+    -moz-user-select: none; /* Для Firefox */
+    -ms-user-select: none; /* Для IE10+ */
+}
+
+/* Опционально: если нужно запретить выделение заголовков тоже */
+#rankingSection {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Медиа-запросы для адаптивности */
+@media only screen and (max-width: 767px) {
+    .graph-section h1 {
+        font-size: 36px;
+    }
+
+    .video .section-title h2 {
+        font-size: 36px;
+    }
+
+    #inputForm {
+        padding: 20px;
+    }
+
+    #inputForm input[type="number"] {
+        font-size: 14px;
+    }
+
+    #inputForm button {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+
+    #myChart {
+        padding: 10px;
+    }
+
+     #rankingSection h2 {
+        font-size: 40px; /* Уменьшаем размер заголовка */
+    }
+
+    #rankingTable {
+        min-width: 100%; /* Таблица занимает всю ширину экрана */
+        display: block; /* Блочное отображение для прокрутки */
+        overflow-x: auto; /* Горизонтальная прокрутка */
+    }
+
+    #rankingTable th,
+    #rankingTable td {
+        padding: 12px; /* Уменьшаем отступы */
+        font-size: 14px; /* Уменьшаем размер текста */
+        white-space: nowrap; /* Запрещаем перенос текста */
+    }
+
+    #rankingTable th {
+        font-size: 12px; /* Уменьшаем размер текста в заголовках */
+    }
+
+
+}
+
+/*----------------------------------------*/
+/* List of Parts Page Styles
+/*----------------------------------------*/
+
+/* Основная секция */
+#list-of-parts-section {
+    background: #191919;
+    padding: 60px 0;
+}
+
+#list-of-parts-section .breadcrumb-option {
+    margin-bottom: 30px;
+}
+
+#list-of-parts-section .breadcrumb-option a {
+    color: #b3b3b3;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+#list-of-parts-section .breadcrumb-option a:hover {
+    color: #baa98f;
+}
+
+#list-of-parts-section .breadcrumb-option span {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+#list-of-parts-section .breadcrumb-text h3 {
+    font-family: 'Mokoto', 'Mokoto Glitch', sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: #ffffff;
+    text-align: right;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+}
+
+/* Стили для таблицы */
+#List-of-parts {
+    width: 100%;
+    border-collapse: collapse;
+    background: #222222;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    margin: 0 auto;
+    font-family: 'Libre Franklin', sans-serif;
+}
+
+#List-of-parts thead {
+    background: #222222;
+}
+
+#List-of-parts th {
+    padding: 18px 16px;
+    text-align: left;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #191919;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    user-select: none;
+}
+
+#List-of-parts th:hover {
+    background: #baa98f;
+    color: #000000;
+}
+
+#List-of-parts th::after {
+    content: '↕️';
+    position: absolute;
+    right: 10px;
+    font-size: 12px;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+#List-of-parts th:hover::after {
+    opacity: 1;
+}
+
+#List-of-parts th.sort-asc::after {
+    content: '↑';
+    opacity: 1;
+}
+
+#List-of-parts th.sort-desc::after {
+    content: '↓';
+    opacity: 1;
+}
+
+#List-of-parts td {
+    padding: 14px 16px;
+    color: #b3b3b3;
+    font-size: 14px;
+    border-bottom: 1px solid #191919;
+    transition: background 0.3s ease;
+}
+
+#List-of-parts tbody tr {
+    background: #222222;
+    transition: background 0.3s ease;
+}
+
+#List-of-parts tbody tr:nth-child(even) {
+    background: #1f1f1f;
+}
+
+#List-of-parts tbody tr:hover {
+    background: #2a2a2a;
+}
+
+#List-of-parts tbody tr:hover td {
+    color: #ffffff;
+}
+
+/* Стили для пустого состояния */
+#List-of-parts tbody tr.empty-state td {
+    text-align: center;
+    padding: 40px;
+    color: #707070;
+    font-style: italic;
+}
+
+/* Запрет выделения текста */
+#List-of-parts-section {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Контейнер таблицы для адаптивности */
+#List-of-parts-section .container {
+    overflow-x: auto;
+    padding: 0 15px;
+}
+
+/* Медиа-запросы для адаптивности */
+@media only screen and (max-width: 991px) {
+    #list-of-parts-section .breadcrumb-text h3 {
+        font-size: 24px;
+        text-align: left;
+        margin-top: 10px;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+    #list-of-parts-section {
+        padding: 40px 0;
+    }
+
+    #list-of-parts-section .breadcrumb-text h3 {
+        font-size: 20px;
+    }
+
+    #List-of-parts {
+        min-width: 100%;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    #List-of-parts th {
+        padding: 14px 12px;
+        font-size: 12px;
+    }
+
+    #List-of-parts td {
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    #List-of-parts th::after {
+        right: 5px;
+        font-size: 10px;
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    #List-of-parts th {
+        padding: 12px 8px;
+        font-size: 11px;
+    }
+
+    #List-of-parts td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+}
+
+/* Анимация загрузки */
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}
+
+#List-of-parts.loading tbody tr {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Стили для индикатора сортировки */
+.sort-indicator {
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+/* Дополнительные стили для улучшения внешнего вида */
+#List-of-parts th:first-child {
+    border-top-left-radius: 8px;
+}
+
+#List-of-parts th:last-child {
+    border-top-right-radius: 8px;
+}
+
+#List-of-parts tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+
+#List-of-parts tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+/* Стили для подсказки при наведении на заголовки */
+#List-of-parts th[title] {
+    cursor: help;
+}
+
+/* Улучшенная тень для таблицы */
+#List-of-parts {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Градиент для заголовков при наведении */
+#List-of-parts th:hover {
+    background: linear-gradient(135deg, #baa98f 0%, #a08f76 100%);
+}
+
+/* Эффект появления строк */
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#List-of-parts tbody tr {
+    animation: fadeInRow 0.3s ease-out forwards;
+}
+
+/* Задержка анимации для каждой строки */
+#List-of-parts tbody tr:nth-child(1) { animation-delay: 0.05s; }
+#List-of-parts tbody tr:nth-child(2) { animation-delay: 0.1s; }
+#List-of-parts tbody tr:nth-child(3) { animation-delay: 0.15s; }
+#List-of-parts tbody tr:nth-child(4) { animation-delay: 0.2s; }
+#List-of-parts tbody tr:nth-child(5) { animation-delay: 0.25s; }
+#List-of-parts tbody tr:nth-child(6) { animation-delay: 0.3s; }
+#List-of-parts tbody tr:nth-child(7) { animation-delay: 0.35s; }
+#List-of-parts tbody tr:nth-child(8) { animation-delay: 0.4s; }
+#List-of-parts tbody tr:nth-child(9) { animation-delay: 0.45s; }
+#List-of-parts tbody tr:nth-child(10) { animation-delay: 0.5s; }
+
+/* Дополнительные стили для индикации сортировки */
+#List-of-parts th.sort-asc::after,
+#List-of-parts th.sort-desc::after {
+    content: '' !important; /* Убираем стандартный индикатор */
+}
+
+#List-of-parts th.sort-asc {
+    background: linear-gradient(135deg, #baa98f 0%, #9b8b74 100%);
+    color: #000000;
+}
+
+#List-of-parts th.sort-desc {
+    background: linear-gradient(135deg, #9b8b74 0%, #baa98f 100%);
+    color: #000000;
+}
+
+/* Подсказка при наведении */
+#List-of-parts th[title] {
+    position: relative;
+}
+
+#List-of-parts th[title]:hover::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+#List-of-parts th[title]:hover::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+    margin-bottom: -5px;
+}
+
+/* Стили для колонки с фото */
+#List-of-parts td:nth-child(3) {
+    text-align: center;
+    width: 100px;
+    min-width: 100px;
+}
+
+.photo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    background: #2a2a2a;
+    overflow: hidden;
+    cursor: pointer;
+    border:1px solid;
+    border-radius: 8px;
+    border-color: #baa98f;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.part-photo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: opacity 0.3s ease;
+}
+
+.part-photo.photo-error {
+    opacity: 0.5;
+}
+
+.no-photo {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2a2a2a;
+    color: #707070;
+    font-size: 12px;
+    border-radius: 4px;
+    margin: 0 auto;
+}
+
+
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+    }
+}
+
+/* Адаптивность для мобильных */
+@media only screen and (max-width: 767px) {
+    #List-of-parts td:nth-child(3) {
+        width: 60px;
+        min-width: 60px;
+    }
+    
+    .photo-container {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .no-photo {
+        width: 50px;
+        height: 50px;
+        font-size: 10px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    .close-modal {
+        right: 15px;
+        font-size: 30px;
+    }
+}
