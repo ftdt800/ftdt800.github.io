@@ -1,241 +1,2508 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="Система онлайн расписаний для телевизоров и киосков. Синхронизация с Google Sheets, прогноз погоды, таймер звонков. Разработка под ключ для учебных заведений.">
-    <meta name="keywords" content="Система онлайн расписаний, школьное ТВ, digital signage школа, расписание на телевизоре, автоматизация школы, Кемерово, разработка ПО, умная школа">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Система онлайн расписаний | Интерактивное информирование</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #fff; overflow-x: hidden; }
+        
+        .section { min-height: 100vh; position: relative; overflow: hidden; }
+        
+        /* Progress bar */
+        .progress-track {
+            position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+            width: 4px; height: 60vh; background: rgba(255,255,255,0.1);
+            border-radius: 4px; z-index: 1000;
+        }
+        .progress-fill {
+            width: 100%; height: 0%; background: linear-gradient(to bottom, #6366f1, #a78bfa, #c084fc);
+            border-radius: 4px; transition: height 0.1s ease-out;
+        }
+        .progress-dot {
+            position: absolute; width: 12px; height: 12px; background: #c084fc;
+            border-radius: 50%; left: 50%; transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px rgba(192,132,252,0.6); transition: top 0.1s ease-out;
+        }
+        
+        /* Floating labels */
+        .floating-label {
+            position: absolute; white-space: nowrap; font-size: 1.5rem; font-weight: 700;
+            color: rgba(255,255,255,0.08); pointer-events: none;
+        }
+        .floating-label small {
+            display: block; font-size: 0.75rem; font-weight: 400; color: rgba(255,255,255,0.05);
+            margin-top: 2px;
+        }
+        
+        /* Price cards */
+        .price-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px; padding: 40px 32px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px); position: relative; overflow: hidden;
+        }
+        .price-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #6366f1, #a78bfa, #c084fc); opacity: 0; transition: opacity 0.4s;
+        }
+        .price-card:hover { border-color: rgba(167,139,250,0.4); transform: translateY(-8px); }
+        .price-card:hover::before { opacity: 1; }
+        .price-card.popular {
+            border-color: rgba(167,139,250,0.3); background: rgba(99,102,241,0.08);
+        }
+        .price-card.popular::before { opacity: 1; }
+        .price-card .popular-badge {
+            position: absolute; top: -1px; right: 24px; background: linear-gradient(90deg, #6366f1, #a78bfa);
+            padding: 4px 16px 8px; border-radius: 0 0 12px 12px; font-size: 0.75rem; font-weight: 600;
+        }
+        
+        /* CTA pulse */
+        .pulse-btn {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.4), 0 0 60px rgba(99,102,241,0.1); }
+            50% { box-shadow: 0 0 40px rgba(99,102,241,0.6), 0 0 100px rgba(99,102,241,0.2); }
+        }
+        
+        /* Mockup transitions */
+        .mockup-content {
+            position: absolute; inset: 0; opacity: 0; transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mockup-content.active { opacity: 1; transform: translateY(0); }
+        
+        /* SVG line animation */
+        .svg-line { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+        
+        /* Char animation */
+        .char { display: inline-block; opacity: 0; transform: translateY(30px); }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 0%, #a78bfa 50%, #6366f1 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        /* Glow effects */
+        .glow-purple { box-shadow: 0 0 40px rgba(99,102,241,0.3); }
+        
+        /* Weather widget */
+        .weather-widget {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 24px; backdrop-filter: blur(10px);
+        }
+        
+        /* Timer widget */
+        .timer-widget {
+            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(167,139,250,0.1));
+            border: 1px solid rgba(99,102,241,0.3); border-radius: 20px; padding: 24px;
+        }
+        
+        /* Day/Night toggle */
+        .day-night-bg {
+            position: absolute; inset: 0; transition: all 1.5s ease; z-index: 0;
+        }
+        
+        /* Smooth scroll */
+        html { scroll-behavior: smooth; }
+        
+        /* Grid pattern */
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        
+        /* Feature icon pulse */
+        .feature-icon {
+            width: 56px; height: 56px; border-radius: 16px;
+            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(167,139,250,0.1));
+            border: 1px solid rgba(99,102,241,0.3); display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .feature-icon:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+        
+        /* Button hover effects */
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(99,102,241,0.4); }
+        .btn-primary::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .btn-primary:hover::after { opacity: 1; }
+        
+        .btn-outline {
+            border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s ease;
+        }
+        .btn-outline:hover { border-color: #a78bfa; background: rgba(167,139,250,0.1); }
+        
+        /* Navigation */
+        .nav-link {
+            position: relative; padding: 4px 0; transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px;
+            background: #a78bfa; transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+        .nav-link:hover { color: #a78bfa; }
+        
+        /* Section divider */
+        .section-divider {
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
 
-    <link rel="icon" type="image/png" href="img/favicon.png">
-
-    <link href="https://fonts.googleapis.com/css?family=Libre+Franklin:400,500,600,700,800,900&display=swap"
-        rel="stylesheet">
-
-    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
-    <link rel="stylesheet" href="css/themify-icons.css" type="text/css">
-    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
-    <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
-    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
-    <link rel="stylesheet" href="css/style.css" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/mainpage.css">
-    
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap" type="text/css">
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .progress-track { display: none; }
+            .floating-label { font-size: 1rem; }
+        }
+    </style>
 </head>
+<body class="grid-pattern">
 
-<body>
-      <header class="header-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-5 col-md-5">
-                    <div class="logo" id="logo-container">
-                        <a href="index.html" id="logo" style="font-size: 18px; font-weight: 800; color: #fff; white-space: nowrap;">Роман Вольнов — Система онлайн расписаний</a>
-                    </div>
-                </div>
-                <div class="col-lg-7 col-md-7">
-                </div>
-            </div>
-        </div>
-    </header>
-    <section class="layers">
-    <div class="layers__container">
-        <style> @media(max-width:768px){.layer-1{background-image:url(img/mainpage/layer2.png)!important}} </style>
-		<div class="layers__item layer-1" style="background-image: url(img/mainpage/layer1.png);"></div>
-        <div class="layers__item layer-3">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-7">
-                        <div class="hs-text" style="padding: 0px 0px 0px 30px;">
-                            <h1 style="font-family: 'nasalization', sans-serif; font-size: 42px; color: #000000">Система онлайн<br>расписаний</h1>
-                            <p style="font-size: 20px;">Интерактивное информирование<br>для учебных заведений</p>
-                            <a href="https://ttttt.me/ftdt800" class="primary-btn">Возможности системы</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="layers__item layer-5">
-            <canvas class="rain"></canvas>
-        </div>
-        
-        <div class="layers__item layer-6" style="background-image: url(img/mainpage/layer4.png);"></div>
-        <div class="layers__item layer-6" style="background-image: url(img/mainpage/layer3.png);"></div>
+    <!-- Progress Bar -->
+    <div class="progress-track" id="progressTrack">
+        <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-dot" id="progressDot"></div>
     </div>
-</section>
 
- <section class="exo-benefits-section spad">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="section-title">
-                    <span>Цифровое образование</span>
-                    <h2>Преимущества Системы онлайн расписаний</h2>
-                </div>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between" id="mainNav">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <span class="font-bold text-lg">Онлайн расписания</span>
+        </div>
+        <div class="hidden md:flex items-center gap-8 text-sm text-gray-400">
+            <a href="#how-it-works" class="nav-link">Как работает</a>
+            <a href="#use-cases" class="nav-link">Применение</a>
+            <a href="#features" class="nav-link">Возможности</a>
+            <a href="#pricing" class="nav-link">Цены</a>
+            <a href="#contact" class="btn-primary px-5 py-2.5 rounded-xl text-sm text-white font-medium">Запросить КП</a>
+        </div>
+        <button class="md:hidden text-white" id="mobileMenuBtn">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="fixed inset-0 z-40 bg-black/90 flex flex-col items-center justify-center gap-8 text-xl hidden" id="mobileMenu">
+        <button class="absolute top-4 right-6 text-white" id="mobileMenuClose">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+        <a href="#how-it-works" class="nav-link" onclick="closeMobileMenu()">Как работает</a>
+        <a href="#use-cases" class="nav-link" onclick="closeMobileMenu()">Применение</a>
+        <a href="#features" class="nav-link" onclick="closeMobileMenu()">Возможности</a>
+        <a href="#pricing" class="nav-link" onclick="closeMobileMenu()">Цены</a>
+        <a href="#contact" class="btn-primary px-8 py-3 rounded-xl text-lg text-white font-medium" onclick="closeMobileMenu()">Запросить КП</a>
+    </div>
+
+    <!-- Section 1: Hero -->
+    <section class="section flex items-center justify-center relative" id="hero">
+        <div class="absolute inset-0">
+            <img src="img/mainpage/layer1.png" 
+                 alt="Background" class="w-full h-full object-cover opacity-40" id="heroBg">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#0a0a0f]"></div>
+        </div>
+        <div class="relative z-10 text-center px-6 max-w-5xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8" id="heroBadge">
+                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                <span class="text-sm text-gray-300">Live обновление</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight" id="heroTitle">
+                Система онлайн<br>
+                <span class="gradient-text">расписаний</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto" id="heroSubtitle">
+                Интерактивное информирование<br class="hidden md:block">для учебных заведений
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center" id="heroButtons">
+                <a href="#features" class="btn-primary px-8 py-4 rounded-2xl text-lg font-semibold inline-flex items-center gap-2">
+                    Возможности системы
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </a>
+                <a href="#how-it-works" class="btn-outline px-8 py-4 rounded-2xl text-lg font-medium text-gray-300 inline-flex items-center gap-2">
+                    Как это работает
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </a>
             </div>
         </div>
-        
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="benefits-image-wrapper">
-                    <div class="benefits-main-image set-bg" data-setbg="img/mainpage/mackup.png">
-                        <div class="benefits-image-overlay">
-                            <div class="benefits-stats">
-                                <div class="stat-item">
-                                    <span class="stat-number">Live</span>
-                                    <span class="stat-label">обновление через Google Sheets</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-number">24/7</span>
-                                    <span class="stat-label">автономная работа</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2" id="scrollIndicator">
+            <span class="text-xs text-gray-500">Прокрутите вниз</span>
+            <div class="w-6 h-10 border-2 border-gray-600 rounded-full flex justify-center pt-2">
+                <div class="w-1.5 h-3 bg-gray-400 rounded-full animate-bounce"></div>
+            </div>
+        </div>
+    </section>
+
+<section class="relative h-screen w-full overflow-hidden bg-[#0a0a0f] flex items-center justify-center" id="how-it-works">
     
-                    <div class="benefits-thumbnails">
-                        <div class="benefits-thumb set-bg" data-setbg="img/mainpage/mackup2.png"></div>
-                        <div class="benefits-thumb set-bg" data-setbg="img/mainpage/mackup3.png"></div>
-                        <div class="benefits-thumb set-bg" data-setbg="img/mainpage/mackup4.png"></div>
+    <div class="absolute inset-0 pointer-events-none overflow-hidden" id="hwBackgroundLabels"></div>
+    <canvas id="hwThreadsCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
+    <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/30 via-transparent to-[#0a0a0f]/30 pointer-events-none z-10"></div>
+
+    <div class="relative z-20 w-full h-full flex items-center justify-center px-4 md:px-8" id="hwStepsContainer">
+        
+        <!-- ШАГ 1: Google Sheets -->
+        <div class="hw-step-panel absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-700" data-step="0">
+            <div class="text-center max-w-6xl mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-green-400 mb-1">Подключаемся по API</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Автоматическая авторизация и безопасный обмен данными с вашими таблицами</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-green-400 mb-1">Работа через прокси</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Защита от блокировок и обход ограничений корпоративных сетей</div>
+                    </div>
+                </div>
+                <div class="flex-1 max-w-2xl">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-green-500/10 border border-green-500/20 mb-8 shadow-[0_0_40px_rgba(34,197,94,0.15)] mx-auto lg:mx-0">
+                        <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <span class="inline-block px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-mono mb-4">ШАГ 1 / 7</span>
+                    <h3 class="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6">Google Sheets</h3>
+                    <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">Вы вносите изменения в обычную таблицу — система мгновенно фиксирует правки и готовит данные к трансляции.</p>
+                    <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">LIVE EDIT</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Real-time Sync</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Zero Config</span>
+                    </div>
+                </div>
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-green-400 mb-1">Автосохранение данных</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Каждое изменение сохраняется в облаке с историей версий и откатом</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-green-400 mb-1">Командная работа</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Несколько редакторов могут работать одновременно без конфликтов</div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- ШАГ 2: Webhook API -->
+        <div class="hw-step-panel absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-700" data-step="1">
+            <div class="text-center max-w-6xl mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-blue-400 mb-1">HTTPS шифрование</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Все запросы защищены TLS 1.3 для максимальной безопасности передачи</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-blue-400 mb-1">JWT авторизация</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Токены доступа с автоматическим обновлением и сроком жизни</div>
+                    </div>
+                </div>
+                <div class="flex-1 max-w-2xl">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-blue-500/10 border border-blue-500/20 mb-8 shadow-[0_0_40px_rgba(59,130,246,0.15)] mx-auto lg:mx-0">
+                        <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16l-4-4m0 0l4-4m-4 4h18m-5 4l4-4m0 0l-4-4"/></svg>
+                    </div>
+                    <span class="inline-block px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-mono mb-4">ШАГ 2 / 7</span>
+                    <h3 class="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6">Webhook API</h3>
+                    <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">Изменения упаковываются в JSON-пакет и отправляются на сервер через защищённый HTTPS-запрос с авторизацией.</p>
+                    <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">POST /sync</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">JSON Payload</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Auth Token</span>
+                    </div>
+                </div>
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-blue-400 mb-1">Retry-логика</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Автоматические повторные попытки при сбоях сети с экспоненциальной задержкой</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-blue-400 mb-1">Rate limiting</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Защита от перегрузки: не более 100 запросов в минуту на ключ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ШАГ 3: Django Backend -->
+        <div class="hw-step-panel absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-700" data-step="2">
+            <div class="text-center max-w-6xl mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-indigo-400 mb-1">PostgreSQL</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Надёжное хранение данных с транзакциями и репликацией</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-indigo-400 mb-1">Redis Cache</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Кэширование частых запросов для ускорения отклика в 10 раз</div>
+                    </div>
+                </div>
+                <div class="flex-1 max-w-2xl">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 mb-8 shadow-[0_0_40px_rgba(99,102,241,0.15)] mx-auto lg:mx-0">
+                        <svg class="w-12 h-12 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"/></svg>
+                    </div>
+                    <span class="inline-block px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-mono mb-4">ШАГ 3 / 7</span>
+                    <h3 class="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6">Django Backend</h3>
+                    <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">Сервер принимает запрос, валидирует данные, применяет бизнес-логику и подготавливает контент для рендеринга.</p>
+                    <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">REST API</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Middleware</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Async Tasks</span>
+                    </div>
+                </div>
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-indigo-400 mb-1">Celery Tasks</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Фоновые задачи для тяжёлых операций без блокировки основного потока</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-indigo-400 mb-1">Docker Deploy</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Контейнеризация для быстрого развёртывания на любом сервере</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ШАГ 4: Рендер HTML -->
+        <div class="hw-step-panel absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-700" data-step="3">
+            <div class="text-center max-w-6xl mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-purple-400 mb-1">Jinja2 шаблоны</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Гибкая система шаблонов с наследованием и кастомными тегами</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-purple-400 mb-1">CSS-in-JS</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Динамические стили, генерируемые на лету под ваш брендбук</div>
+                    </div>
+                </div>
+                <div class="flex-1 max-w-2xl">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-purple-500/10 border border-purple-500/20 mb-8 shadow-[0_0_40px_rgba(168,85,247,0.15)] mx-auto lg:mx-0">
+                        <svg class="w-12 h-12 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                    </div>
+                    <span class="inline-block px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-mono mb-4">ШАГ 4 / 7</span>
+                    <h3 class="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6">Рендер HTML</h3>
+                    <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">Django генерирует актуальную HTML-страницу через шаблонизатор Jinja2, применяя ваш фирменный стиль и адаптивную вёрстку.</p>
+                    <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Jinja2</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">HTML5/CSS3</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Template Cache</span>
+                    </div>
+                </div>
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-purple-400 mb-1">CDN Ready</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Статика автоматически загружается на Edge-серверы по всему миру</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-purple-400 mb-1">SEO Meta</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Автоматическая генерация мета-тегов для поисковой оптимизации</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ШАГ 5: WebSocket Push -->
+        <div class="hw-step-panel absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-700" data-step="4">
+            <div class="text-center max-w-6xl mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-pink-400 mb-1">PUB/SUB архитектура</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Масштабируемая рассылка обновлений тысячам клиентов одновременно</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-pink-400 mb-1">Heartbeat Ping</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Постоянный мониторинг соединения с авто-переподключением</div>
+                    </div>
+                </div>
+                <div class="flex-1 max-w-2xl">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-pink-500/10 border border-pink-500/20 mb-8 shadow-[0_0_40px_rgba(236,72,153,0.15)] mx-auto lg:mx-0">
+                        <svg class="w-12 h-12 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <span class="inline-block px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-mono mb-4">ШАГ 5 / 7</span>
+                    <h3 class="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6">WebSocket Push</h3>
+                    <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">Готовая страница мгновенно рассылается всем подключённым экранам через WebSocket — задержка менее 50 мс.</p>
+                    <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">PUB/SUB</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">&lt;50ms Latency</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Auto Reconnect</span>
+                    </div>
+                </div>
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-pink-400 mb-1">WSS шифрование</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Безопасный WebSocket поверх TLS для защиты трафика</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-pink-400 mb-1">Channels Django</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Нативная поддержка асинхронных соединений в экосистеме Django</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ШАГ 6: Клиентский браузер -->
+        <div class="hw-step-panel absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-700" data-step="5">
+            <div class="text-center max-w-6xl mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-cyan-400 mb-1">Service Worker</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Кэширование контента для работы без интернета и мгновенной загрузки</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-cyan-400 mb-1">PWA Ready</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Установка на главный экран ТВ как нативное приложение</div>
+                    </div>
+                </div>
+                <div class="flex-1 max-w-2xl">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-cyan-500/10 border border-cyan-500/20 mb-8 shadow-[0_0_40px_rgba(6,182,212,0.15)] mx-auto lg:mx-0">
+                        <svg class="w-12 h-12 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span class="inline-block px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono mb-4">ШАГ 6 / 7</span>
+                    <h3 class="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6">Клиентский браузер</h3>
+                    <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">Браузер на ТВ или киоске получает обновление, кэширует контент и плавно отображает новое расписание без перезагрузки.</p>
+                    <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Smart TV</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Offline Cache</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">4K Ready</span>
+                    </div>
+                </div>
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-cyan-400 mb-1">Auto-refresh</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Фоновое обновление контента без мерцания и перезагрузки страницы</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-cyan-400 mb-1">Touch UI</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Адаптивный интерфейс для управления с сенсорных панелей и пультов</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ШАГ 7: Финальный UI -->
+        <div class="hw-step-panel absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-700" data-step="6">
+            <div class="text-center max-w-6xl mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-amber-400 mb-1">SLA 99.9%</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Гарантированная доступность сервиса с мониторингом 24/7</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-amber-400 mb-1">Audit Log</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Полное журналирование всех изменений для безопасности и отладки</div>
+                    </div>
+                </div>
+                <div class="flex-1 max-w-2xl">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-amber-500/10 border border-amber-500/20 mb-8 shadow-[0_0_40px_rgba(245,158,11,0.15)] mx-auto lg:mx-0">
+                        <svg class="w-12 h-12 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span class="inline-block px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-mono mb-4">ШАГ 7 / 7</span>
+                    <h3 class="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6">Финальный UI</h3>
+                    <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">Посетители видят красивое, актуальное расписание на большом экране — 24/7, без задержек и ручного вмешательства.</p>
+                    <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Auto Sync</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">24/7 Uptime</span>
+                        <span class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400">Zero Downtime</span>
+                    </div>
+                </div>
+                <div class="hidden lg:flex flex-col gap-4 w-48">
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-amber-400 mb-1">Backup Daily</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Ежедневное резервное копирование в гео-распределённое хранилище</div>
+                    </div>
+                    <div class="side-detail opacity-0 translate-y-4 transition-all duration-500">
+                        <div class="text-sm font-semibold text-amber-400 mb-1">Alerts System</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">Мгновенные уведомления в Telegram/Email при любых инцидентах</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+        <!-- Прогресс-индикаторы -->
+    <div class="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3" id="hwProgress">
+        <button class="hw-progress-dot w-3 h-3 rounded-full bg-white/30 border border-white/20 transition-all duration-300 hover:bg-white/60" data-step="0"></button>
+        <button class="hw-progress-dot w-3 h-3 rounded-full bg-white/30 border border-white/20 transition-all duration-300 hover:bg-white/60" data-step="1"></button>
+        <button class="hw-progress-dot w-3 h-3 rounded-full bg-white/30 border border-white/20 transition-all duration-300 hover:bg-white/60" data-step="2"></button>
+        <button class="hw-progress-dot w-3 h-3 rounded-full bg-white/30 border border-white/20 transition-all duration-300 hover:bg-white/60" data-step="3"></button>
+        <button class="hw-progress-dot w-3 h-3 rounded-full bg-white/30 border border-white/20 transition-all duration-300 hover:bg-white/60" data-step="4"></button>
+        <button class="hw-progress-dot w-3 h-3 rounded-full bg-white/30 border border-white/20 transition-all duration-300 hover:bg-white/60" data-step="5"></button>
+        <button class="hw-progress-dot w-3 h-3 rounded-full bg-white/30 border border-white/20 transition-all duration-300 hover:bg-white/60" data-step="6"></button>
+    </div>
+
+    <!-- Подсказки -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 hidden md:flex flex-col items-center gap-2 text-gray-500 text-xs" id="hwScrollHint">
+        <span>Листайте колёсиком</span>
+        <div class="w-6 h-10 border-2 border-gray-600 rounded-full flex justify-center pt-2">
+            <div class="w-1 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+        </div>
+    </div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 md:hidden text-gray-500 text-xs text-center px-4" id="hwMobileHint">
+        <p>Листайте вверх/вниз для навигации</p>
+    </div>
+
+    <script>
+    (function() {
+        // === КОНФИГУРАЦИЯ ===
+        const TOTAL_STEPS = 7;
+        const SCROLL_THRESHOLD = 10; // Минимальный дельта-скролл для срабатывания
+        const CENTER_THRESHOLD = 0.45; // Допуск для определения "центра" (15% от высоты экрана)
+
+        // === СОСТОЯНИЕ ===
+        const state = {
+            currentStep: 0,
+            isAnimating: false,
+            isSectionActive: false,    // Секция в центре экрана — перехватываем скролл
+            lastScrollY: window.scrollY,
+            scrollDirection: 0,        // 1 = вниз, -1 = вверх
+            labelElements: [],
+            mouseX: window.innerWidth / 2,
+            mouseY: window.innerHeight / 2,
+            unlockTimeout: null
+        };
+
+        // === DOM ELEMENTS ===
+        const sectionEl = document.getElementById('how-it-works');
+        const bgContainer = document.getElementById('hwBackgroundLabels');
+        const panels = document.querySelectorAll('.hw-step-panel');
+        const progressDots = document.querySelectorAll('.hw-progress-dot');
+        const scrollHint = document.getElementById('hwScrollHint');
+        const threadsCanvas = document.getElementById('hwThreadsCanvas');
+        const ctx = threadsCanvas.getContext('2d');
+
+        // === CANVAS SETUP ===
+        function resizeCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            threadsCanvas.width = window.innerWidth * dpr;
+            threadsCanvas.height = window.innerHeight * dpr;
+            ctx.scale(dpr, dpr);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        window.addEventListener('mousemove', (e) => {
+            const rect = sectionEl.getBoundingClientRect();
+            state.mouseX = e.clientX - rect.left;
+            state.mouseY = e.clientY - rect.top;
+        });
+
+        // === FLOATING LABELS ===
+        const stepLabels = [
+            ["LIVE EDIT", "Cloud Sync", "Auto-save", "Collaboration", "Real-time", "Version History", "Share Link", "Comments", "Mobile App", "Offline Mode"],
+            ["POST /sync", "JSON", "HTTPS", "Auth Token", "200 OK", "Rate Limit", "Retry Logic", "Webhook URL", "Payload Validate", "Error Handler"],
+            ["REST API", "Middleware", "ORM", "Async Views", "Celery", "Redis Cache", "PostgreSQL", "Gunicorn", "Nginx", "Docker"],
+            ["Jinja2", "HTML5", "CSS3", "Template Tags", "Static Files", "Minify", "Cache Headers", "CDN Ready", "SEO Meta", "Responsive"],
+            ["PUB/SUB", "Broadcast", "<50ms", "Reconnect", "Heartbeat", "WS://", "WSS://", "Socket.IO", "Channels", "AsyncIO"],
+            ["Smart TV", "Chromium", "4K Ready", "Offline Cache", "Auto-refresh", "LocalStorage", "ServiceWorker", "PWA", "WebGL", "Touch UI"],
+            ["Auto Sync", "24/7", "Zero Downtime", "Scalable", "Secure", "Audit Log", "Backup", "Monitoring", "Alerts", "SLA 99.9%"]
+        ];
+
+        function createLabel(text, delay) {
+            const el = document.createElement('div');
+            el.className = 'absolute text-white/5 text-lg md:text-2xl lg:text-3xl font-black whitespace-nowrap opacity-0 transition-opacity duration-500';
+            el.textContent = text;
+            el.style.left = Math.random() * 90 + 5 + '%';
+            el.style.top = Math.random() * 90 + 5 + '%';
+            return el;
+        }
+
+        function showStepLabels(stepIndex) {
+            state.labelElements.forEach(el => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 300);
+            });
+            state.labelElements = [];
+
+            const labels = stepLabels[stepIndex];
+            labels.forEach((text, i) => {
+                const el = createLabel(text, i * 0.3);
+                bgContainer.appendChild(el);
+                state.labelElements.push(el);
+                setTimeout(() => { el.style.opacity = Math.random() * 0.4 + 0.1; }, i * 100);
+            });
+
+            state.labelElements.forEach((el, i) => {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(el, {
+                        y: "+=" + (Math.random() * 40 - 20),
+                        x: "+=" + (Math.random() * 30 - 15),
+                        duration: 8 + Math.random() * 4,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "sine.inOut",
+                        delay: i * 0.2
+                    });
+                }
+            });
+        }
+
+        function drawThreads() {
+            const dpr = window.devicePixelRatio || 1;
+            ctx.clearRect(0, 0, threadsCanvas.width / dpr, threadsCanvas.height / dpr);
+            const sectionRect = sectionEl.getBoundingClientRect();
             
-            <div class="col-lg-6">
-                <div class="benefits-content">
-                    <div class="benefits-intro">
-                        <h3 class="benefits-title">Единая информационная среда</h3>
-                        <p class="benefits-description">
-                            Наша разработка — это не просто экран с текстом. Это полноценный сервис, который берет данные из ваших таблиц и превращает их в наглядное, красивое расписание на телевизорах и киосках.
+            if (sectionRect.top > window.innerHeight || sectionRect.bottom < 0) {
+                requestAnimationFrame(drawThreads);
+                return;
+            }
+
+            state.labelElements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const elX = (rect.left + rect.width / 2) - sectionRect.left;
+                const elY = (rect.top + rect.height / 2) - sectionRect.top;
+                const opacity = parseFloat(window.getComputedStyle(el).opacity);
+                
+                if (opacity > 0.01) {
+                    ctx.beginPath();
+                    ctx.moveTo(state.mouseX, state.mouseY);
+                    ctx.lineTo(elX, elY);
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.2})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(elX, elY, 1.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.4})`;
+                    ctx.fill();
+                }
+            });
+            requestAnimationFrame(drawThreads);
+        }
+        requestAnimationFrame(drawThreads);
+
+        // === SIDE DETAILS ANIMATION ===
+        function animateSideDetails(panel, delay = 1000) {
+            const details = panel.querySelectorAll('.side-detail');
+            details.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, delay + index * 300);
+            });
+        }
+
+        function resetSideDetails(panel) {
+            panel.querySelectorAll('.side-detail').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(16px)';
+            });
+        }
+
+        // === STEP NAVIGATION ===
+        function goToStep(targetStep) {
+            if (state.isAnimating || targetStep === state.currentStep || targetStep < 0 || targetStep >= TOTAL_STEPS) return;
+            state.isAnimating = true;
+
+            resetSideDetails(panels[state.currentStep]);
+
+            gsap.to(panels[state.currentStep], {
+                opacity: 0, scale: 0.98, duration: 0.5, ease: "power2.in",
+                onComplete: () => { panels[state.currentStep].classList.add('pointer-events-none'); }
+            });
+
+            panels[targetStep].classList.remove('pointer-events-none');
+            gsap.fromTo(panels[targetStep], 
+                { opacity: 0, scale: 1.02 }, 
+                { opacity: 1, scale: 1, duration: 0.7, ease: "power2.out" }
+            );
+
+            progressDots.forEach((dot, i) => {
+                dot.classList.toggle('bg-white', i === targetStep);
+                dot.classList.toggle('bg-white/30', i !== targetStep);
+                dot.classList.toggle('scale-125', i === targetStep);
+                dot.classList.toggle('scale-100', i !== targetStep);
+            });
+
+            showStepLabels(targetStep);
+            animateSideDetails(panels[targetStep], 1000);
+            if (scrollHint) scrollHint.style.opacity = '0';
+
+            state.currentStep = targetStep;
+            // Если вернулись на первый шаг и скроллим вверх — сразу разблокируем
+            if (targetStep === 0 && state.scrollDirection < 0) {
+                if (state.unlockTimeout) {
+                    clearTimeout(state.unlockTimeout);
+                    state.unlockTimeout = null;
+                }
+                document.body.style.overflow = '';
+            }
+            // Если достигнут последний шаг — запускаем таймер разблокировки через 5 сек
+            if (targetStep === TOTAL_STEPS - 1) {
+                // Очищаем предыдущий таймер, если был
+                if (state.unlockTimeout) clearTimeout(state.unlockTimeout);
+                
+                state.unlockTimeout = setTimeout(() => {
+                    // Разблокируем скролл только если всё ещё на последнем шаге
+                    if (state.currentStep === TOTAL_STEPS - 1 && state.isSectionActive) {
+                        document.body.style.overflow = '';
+                    }
+                }, 2000);
+            } else {
+                // Если ушли с последнего шага — отменяем таймер
+                if (state.unlockTimeout) {
+                    clearTimeout(state.unlockTimeout);
+                    state.unlockTimeout = null;
+                }
+            }
+            setTimeout(() => { state.isAnimating = false; }, 700);
+        }
+
+        // === SCROLL LOCK CONTROL ===
+        function updateScrollLock() {
+            // Если активен таймер разблокировки — не блокируем вручную
+            if (state.unlockTimeout) return;
+            
+            const shouldUnlock = 
+                !state.isSectionActive ||
+                (state.currentStep === 0 && state.scrollDirection < 0);
+            
+            document.body.style.overflow = shouldUnlock ? '' : 'hidden';
+        }
+
+        // === CENTER DETECTION ===
+        function isSectionCentered() {
+            const rect = sectionEl.getBoundingClientRect();
+            const viewportCenter = window.innerHeight / 2;
+            const sectionCenter = rect.top + rect.height / 2;
+            const distance = Math.abs(viewportCenter - sectionCenter);
+            return distance < viewportCenter * CENTER_THRESHOLD;
+        }
+
+        // === MAIN SCROLL HANDLER ===
+        function handleScroll(e) {
+            // Определяем направление скролла
+            const currentScroll = window.scrollY || window.pageYOffset;
+            state.scrollDirection = currentScroll > state.lastScrollY ? 1 : -1;
+            state.lastScrollY = currentScroll;
+
+            // Проверяем, в центре ли секция
+            const wasActive = state.isSectionActive;
+            state.isSectionActive = isSectionCentered();
+
+            // Если секция только что вошла в центр — активируем
+            if (state.isSectionActive && !wasActive) {
+                if (scrollHint) scrollHint.style.opacity = '0';
+            }
+
+            // Если секция не в центре — не перехватываем
+            if (!state.isSectionActive) {
+                updateScrollLock();
+                return true; // разрешаем стандартный скролл
+            }
+
+            // На мобильных не перехватываем жесты
+            if (window.innerWidth < 768 && e?.type === 'wheel') {
+                return true;
+            }
+
+            // Если на границе и скроллим наружу — разблокируем
+            updateScrollLock();
+            if (document.body.style.overflow !== 'hidden') {
+                return true;
+            }
+
+            // Перехватываем скролл для навигации по шагам
+            if (e?.type === 'wheel') {
+                e.preventDefault();
+            }
+
+            const delta = e?.deltaY || (state.scrollDirection * 100);
+            if (Math.abs(delta) > SCROLL_THRESHOLD && !state.isAnimating) {
+                if (delta > 0) {
+                    goToStep(state.currentStep + 1);
+                } else {
+                    goToStep(state.currentStep - 1);
+                }
+            }
+
+            return false;
+        }
+
+        // === EVENT LISTENERS ===
+        
+        // Wheel event (desktop)
+        window.addEventListener('wheel', (e) => {
+            const result = handleScroll(e);
+            if (result === false) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Touch events (mobile)
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            state.lastScrollY = window.scrollY;
+        }, { passive: true });
+
+        window.addEventListener('touchend', (e) => {
+            const touchEndY = e.changedTouches[0].clientY;
+            const diff = touchStartY - touchEndY;
+            
+            // Эмулируем wheel-событие для единообразия логики
+            const fakeEvent = { type: 'touch', deltaY: diff };
+            handleScroll(fakeEvent);
+        }, { passive: true });
+
+        // Keyboard navigation
+        window.addEventListener('keydown', (e) => {
+            if (!state.isSectionActive) return;
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                goToStep(state.currentStep + 1);
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                goToStep(state.currentStep - 1);
+            }
+        });
+
+        // Progress dots click
+        progressDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const step = parseInt(dot.dataset.step);
+                goToStep(step);
+            });
+        });
+
+        // === INITIALIZATION ===
+        function init() {
+            // Показываем первый шаг
+            panels[0].classList.remove('pointer-events-none');
+            panels[0].style.opacity = '1';
+            progressDots[0].classList.add('bg-white', 'scale-125');
+            progressDots[0].classList.remove('bg-white/30');
+            showStepLabels(0);
+            // Не анимируем детали при первой загрузке
+
+            // Обновляем позицию скролла
+            state.lastScrollY = window.scrollY;
+            
+            // Начальное состояние: скролл разблокирован
+            document.body.style.overflow = '';
+        }
+
+        // Запускаем после загрузки DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // === SCROLLTRIGGER INTEGRATION (optional) ===
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.create({
+                trigger: "#how-it-works",
+                start: "top center",
+                end: "bottom center",
+                onEnter: () => { state.isSectionActive = true; updateScrollLock(); },
+                onEnterBack: () => { state.isSectionActive = true; updateScrollLock(); },
+                onLeave: () => { state.isSectionActive = false; updateScrollLock(); },
+                onLeaveBack: () => { state.isSectionActive = false; updateScrollLock(); }
+            });
+        }
+
+    })();
+    </script>
+</section>
+    <!-- Section 3: Use cases -->
+    <section class="section flex items-center justify-center relative" id="use-cases">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-purple-950/10 to-[#0a0a0f]"></div>
+        <div class="relative z-10 px-6 max-w-6xl mx-auto w-full">
+            <div class="text-center mb-16">
+                <span class="text-purple-400 text-sm font-semibold tracking-widest uppercase" id="ucLabel">Применение</span>
+                <h2 class="text-4xl md:text-6xl font-black mt-4" id="ucTitle">Где это можно использовать?</h2>
+            </div>
+
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <!-- Mockup -->
+                <div class="w-full lg:w-1/2 flex justify-center" id="mockupContainer">
+                    <div class="relative w-72 md:w-80 aspect-[9/16] bg-gray-900 rounded-[2rem] border-4 border-gray-700 shadow-2xl overflow-hidden">
+                        <!-- Screen content -->
+                        <div class="absolute inset-2 bg-gray-950 rounded-[1.5rem] overflow-hidden">
+                            <!-- Notch -->
+                            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-900 rounded-b-xl z-20"></div>
+                            
+                            <!-- School content -->
+                            <div class="mockup-content active" id="mockupSchool">
+                                <div class="bg-indigo-600 p-4 pt-8">
+                                    <h3 class="text-white font-bold text-sm">Школа №7</h3>
+                                    <p class="text-indigo-200 text-xs">г. Кемерово</p>
+                                </div>
+                                <div class="p-3 space-y-2">
+                                    <div class="bg-indigo-900/50 rounded-lg p-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-300">08:00</span>
+                                        <span class="text-xs text-white font-medium">Математика</span>
+                                    </div>
+                                    <div class="bg-indigo-900/50 rounded-lg p-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-300">09:40</span>
+                                        <span class="text-xs text-white font-medium">Русский язык</span>
+                                    </div>
+                                    <div class="bg-indigo-900/50 rounded-lg p-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-300">11:20</span>
+                                        <span class="text-xs text-white font-medium">История</span>
+                                    </div>
+                                    <div class="bg-indigo-900/50 rounded-lg p-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-300">13:00</span>
+                                        <span class="text-xs text-white font-medium">Физика</span>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-4 left-4 right-4">
+                                    <div class="bg-green-500/20 border border-green-500/30 rounded-lg p-2 text-center">
+                                        <span class="text-xs text-green-300"> До конца урока: 12:34</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cafe content -->
+                            <div class="mockup-content" id="mockupCafe">
+                                <div class="bg-amber-600 p-4 pt-8">
+                                    <h3 class="text-white font-bold text-sm">Кафе «Уют»</h3>
+                                    <p class="text-amber-200 text-xs">Меню на сегодня</p>
+                                </div>
+                                <div class="p-3 space-y-2">
+                                    <div class="bg-amber-900/50 rounded-lg p-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-300">🥣</span>
+                                        <span class="text-xs text-white font-medium">Борщ</span>
+                                        <span class="text-xs text-amber-300">120₽</span>
+                                    </div>
+                                    <div class="bg-amber-900/50 rounded-lg p-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-300">🍗</span>
+                                        <span class="text-xs text-white font-medium">Курица</span>
+                                        <span class="text-xs text-amber-300">180₽</span>
+                                    </div>
+                                    <div class="bg-amber-900/50 rounded-lg p-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-300">🥗</span>
+                                        <span class="text-xs text-white font-medium">Салат</span>
+                                        <span class="text-xs text-amber-300">95₽</span>
+                                    </div>
+                                    <div class="bg-amber-900/50 rounded-lg p-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-300">🧃</span>
+                                        <span class="text-xs text-white font-medium">Компот</span>
+                                        <span class="text-xs text-amber-300">40₽</span>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-4 left-4 right-4">
+                                    <div class="bg-amber-500/20 border border-amber-500/30 rounded-lg p-2 text-center">
+                                        <span class="text-xs text-amber-300">🍽 Обед до 14:00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- University content -->
+                            <div class="mockup-content" id="mockupUni">
+                                <div class="bg-rose-600 p-4 pt-8">
+                                    <h3 class="text-white font-bold text-sm">КузГТУ</h3>
+                                    <p class="text-rose-200 text-xs">Анонсы событий</p>
+                                </div>
+                                <div class="p-3 space-y-2">
+                                    <div class="bg-rose-900/50 rounded-lg p-2">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-xs bg-rose-500/30 px-2 py-0.5 rounded text-rose-200">Сегодня</span>
+                                        </div>
+                                        <p class="text-xs text-white font-medium">День открытых дверей</p>
+                                        <p class="text-xs text-gray-400">10:00, Аудитория 301</p>
+                                    </div>
+                                    <div class="bg-rose-900/50 rounded-lg p-2">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-xs bg-rose-500/30 px-2 py-0.5 rounded text-rose-200">Завтра</span>
+                                        </div>
+                                        <p class="text-xs text-white font-medium">Конкурс проектов</p>
+                                        <p class="text-xs text-gray-400">14:00, Актовый зал</p>
+                                    </div>
+                                    <div class="bg-rose-900/50 rounded-lg p-2">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-xs bg-rose-500/30 px-2 py-0.5 rounded text-rose-200">15 мар</span>
+                                        </div>
+                                        <p class="text-xs text-white font-medium">Научная конференция</p>
+                                        <p class="text-xs text-gray-400">09:00, Конференц-зал</p>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-4 left-4 right-4">
+                                    <div class="bg-rose-500/20 border border-rose-500/30 rounded-lg p-2 text-center">
+                                        <span class="text-xs text-rose-300">📢 3 новых объявления</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content tabs -->
+                <div class="w-full lg:w-1/2" id="ucTabs">
+                    <div class="space-y-6">
+                        <div class="uc-tab cursor-pointer p-6 rounded-2xl border border-white/5 bg-white/[0.02] transition-all duration-300 hover:bg-white/[0.05] hover:border-indigo-500/30" data-tab="school" onclick="switchMockup('school')">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1">Школы и гимназии</h3>
+                                    <p class="text-gray-400 text-sm">Расписание уроков, звонки, объявления для учеников и родителей</p>
+                                    <div class="flex items-center gap-2 mt-3">
+                                        <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full">Школа №7</span>
+                                        <span class="text-xs bg-green-500/20 text-green-300 px-3 py-1 rounded-full">Работает</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="uc-tab cursor-pointer p-6 rounded-2xl border border-white/5 bg-white/[0.02] transition-all duration-300 hover:bg-white/[0.05] hover:border-amber-500/30" data-tab="cafe" onclick="switchMockup('cafe')">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1">Кафе и столовые</h3>
+                                    <p class="text-gray-400 text-sm">Цифровое меню, акции, цены и информация о блюдах</p>
+                                    <div class="flex items-center gap-2 mt-3">
+                                        <span class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full">Меню дня</span>
+                                        <span class="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full">Акции</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="uc-tab cursor-pointer p-6 rounded-2xl border border-white/5 bg-white/[0.02] transition-all duration-300 hover:bg-white/[0.05] hover:border-rose-500/30" data-tab="uni" onclick="switchMockup('uni')">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-rose-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1">ВУЗы и колледжи</h3>
+                                    <p class="text-gray-400 text-sm">Анонсы мероприятий, расписание пар, навигация по корпусам</p>
+                                    <div class="flex items-center gap-2 mt-3">
+                                        <span class="text-xs bg-rose-500/20 text-rose-300 px-3 py-1 rounded-full">КузГТУ</span>
+                                        <span class="text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full">События</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SVG connecting lines -->
+                    <svg class="hidden lg:block absolute" style="pointer-events:none;">
+                        <line class="svg-line" x1="0" y1="0" x2="0" y2="0" stroke="#6366f1" stroke-width="2"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Section 4: Features with floating labels -->
+<section class="section relative flex items-center justify-center overflow-hidden bg-[#0a0a0f]" id="features">
+    <!-- Маски для плавного появления/скрытия надписей -->
+    <div class="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-10 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-10 pointer-events-none"></div>
+
+    <!-- Контейнер плавающих надписей (Спереди) -->
+    <div class="absolute inset-0 flex justify-between px-4 md:px-12 z-0 pointer-events-none" id="floatingContainer">
+        <!-- Колонки будут заполнены JS -->
+    </div>
+
+    <!-- Центральная часть -->
+    <div class="relative z-20 px-6 max-w-5xl mx-auto w-full">
+        <div class="text-center mb-12">
+            <span class="text-indigo-400 text-sm font-semibold tracking-widest uppercase" id="featLabel">Функционал</span>
+            <h2 class="text-4xl md:text-6xl font-black mt-4" id="featTitle">Возможности системы</h2>
+        </div>
+
+        <!-- Новый интерактивный виджет -->
+        <div class="bg-[#0d0d14]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-10 max-w-3xl mx-auto relative overflow-hidden group shadow-2xl shadow-indigo-500/5" id="featureWidget">
+            <!-- Фоновые свечения -->
+            <div class="absolute -top-24 -right-24 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl transition-all duration-700 group-hover:bg-indigo-500/20 group-hover:scale-110"></div>
+            <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl transition-all duration-700 group-hover:bg-purple-500/20 group-hover:scale-110"></div>
+
+            <div class="relative z-10">
+                <div class="flex flex-col lg:flex-row gap-8 items-center">
+                    <!-- Левая часть: Контент -->
+                    <div class="flex-1 space-y-5 w-full">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center transition-colors duration-300" id="widgetIconBox">
+                                <svg class="w-6 h-6 text-indigo-400" id="widgetIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-bold transition-opacity duration-300" id="widgetTitle">Live-обновление</h3>
+                        </div>
+                        <p class="text-gray-300 leading-relaxed text-sm md:text-base transition-opacity duration-300" id="widgetDesc">
+                            Данные из Google Sheets мгновенно транслируются на все подключенные экраны. Без задержек, без ручного обновления. Изменили таблицу — через 2 секунды информация уже на табло.
                         </p>
+                        <div class="flex flex-wrap gap-3 transition-opacity duration-300" id="widgetTags">
+                            <span class="px-3 py-1.5 rounded-lg bg-white/5 text-xs font-medium text-gray-400 border border-white/10">Google API</span>
+                            <span class="px-3 py-1.5 rounded-lg bg-white/5 text-xs font-medium text-gray-400 border border-white/10">Real-time sync</span>
+                            <span class="px-3 py-1.5 rounded-lg bg-white/5 text-xs font-medium text-gray-400 border border-white/10">0 задержек</span>
+                        </div>
                     </div>
-                    
-                    <div class="benefits-grid">
-                        <div class="benefit-item">
-                            <div class="benefit-header">
-                                <div class="benefit-icon-wrapper">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <h4>Таймер звонков</h4>
-                            </div>
-                            <div class="benefit-description">
-                                <p>Автоматический расчет и отображение времени до конца текущего урока или начала следующей перемены.</p>
-                            </div>
-                        </div>
 
-                        <div class="benefit-item">
-                            <div class="benefit-header">
-                                <div class="benefit-icon-wrapper">
-                                    <i class="fas fa-cloud-sun"></i>
+                    <!-- Правая часть: Визуализация -->
+                    <div class="flex-1 w-full lg:max-w-xs">
+                        <div class="bg-black/60 rounded-2xl p-4 border border-white/5 h-52 flex flex-col items-center justify-center relative overflow-hidden" id="widgetPreview">
+                            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 transition-colors duration-500" id="previewBg"></div>
+                            <div class="relative z-10 text-center transition-all duration-300" id="previewContent">
+                                <div class="text-5xl font-mono font-bold text-white/90 mb-1" id="previewValue">100%</div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wider" id="previewLabel">Синхронизация</div>
+                                <div class="mt-3 w-32 h-1 bg-white/10 rounded-full overflow-hidden mx-auto">
+                                    <div class="h-full bg-indigo-500 rounded-full transition-all duration-500" style="width: 100%" id="previewBar"></div>
                                 </div>
-                                <h4>Погода и время</h4>
-                            </div>
-                            <div class="benefit-description">
-                                <p>Интеграция актуального прогноза погоды и точного серверного времени для удобства всех присутствующих.</p>
-                            </div>
-                        </div>
-
-                        <div class="benefit-item">
-                            <div class="benefit-header">
-                                <div class="benefit-icon-wrapper">
-                                    <i class="fas fa-bullhorn"></i>
-                                </div>
-                                <h4>События и объявления</h4>
-                            </div>
-                            <div class="benefit-description">
-                                <p>Возможность моментального вывода важных сообщений и анонсов мероприятий поверх основного контента.</p>
-                            </div>
-                        </div>
-
-                        <div class="benefit-item">
-                            <div class="benefit-header">
-                                <div class="benefit-icon-wrapper">
-                                    <i class="fas fa-tools"></i>
-                                </div>
-                                <h4>Индивидуальная разработка</h4>
-                            </div>
-                            <div class="benefit-description">
-                                <p>Изготавливаем системы под заказ для школ, колледжей, университетов и детских садов с учетом ваших требований.</p>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Навигация -->
+                <div class="flex justify-center gap-4 mt-8">
+                    <button class="w-2.5 h-2.5 rounded-full bg-indigo-500 transition-all hover:scale-125" onclick="switchFeature(0)"></button>
+                    <button class="w-2.5 h-2.5 rounded-full bg-white/20 hover:bg-white/40 transition-all hover:scale-125" onclick="switchFeature(1)"></button>
+                    <button class="w-2.5 h-2.5 rounded-full bg-white/20 hover:bg-white/40 transition-all hover:scale-125" onclick="switchFeature(2)"></button>
+                    <button class="w-2.5 h-2.5 rounded-full bg-white/20 hover:bg-white/40 transition-all hover:scale-125" onclick="switchFeature(3)"></button>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
- <section class="features-section py-16">
-    <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12">
-            Где это уже работает?
-        </h2>
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="feature-card rounded-xl text-center">
-                <div class="feature-icon rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-check-circle text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3">Школа №7, г. Кемерово</h3>
-                <p class="text-gray-600">Система проходит успешное тестирование, обеспечивая учеников актуальной информацией каждый день.</p>
-            </div>
-            <div class="feature-card rounded-xl text-center">
-                <div class="feature-icon rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-graduation-cap text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3">ВУЗы и Колледжи</h3>
-                <p class="text-gray-600">Наше решение идеально подходит для крупных корпусов с распределенной сетью экранов.</p>
-            </div>
-            <div class="feature-card rounded-xl text-center">
-                <div class="feature-icon rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-child text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3">Детские сады</h3>
-                <p class="text-gray-600">Информирование родителей о меню, занятиях и предстоящих праздниках в удобном цифровом формате.</p>
-            </div>
-        </div>
-    </div>
-</section>
+<script>
+(function() {
+    // 1. Данные для плавающих надписей (20 шт.)
+    const floatingData = [
+        { title: "Интеграция с 1С", desc: "Автоматическая синхронизация" },
+        { title: "Больница", desc: "Расписание врачей и записей" },
+        { title: "Фитнес-клуб", desc: "Тренировки и абонементы" },
+        { title: "Бизнес-центр", desc: "Навигация и аренда залов" },
+        { title: "Ресторан", desc: "Цифровое меню и акции" },
+        { title: "Кинотеатр", desc: "Афиша и бронирование" },
+        { title: "Автовокзал", desc: "Расписание рейсов" },
+        { title: "Поликлиника", desc: "Электронная очередь" },
+        { title: "ТРЦ", desc: "Карта и события" },
+        { title: "Отель", desc: "Конференции и услуги" },
+        { title: "Библиотека", desc: "График работы залов" },
+        { title: "Спортшкола", desc: "Секции и соревнования" },
+        { title: "Музей", desc: "Экскурсии и выставки" },
+        { title: "Конгресс-холл", desc: "Расписание мероприятий" },
+        { title: "Кофейня", desc: "Меню дня и скидки" },
+        { title: "Барбершоп", desc: "Запись к мастерам" },
+        { title: "Автосервис", desc: "Статус ремонта авто" },
+        { title: "Детский сад", desc: "Меню и занятия" },
+        { title: "Языковая школа", desc: "Группы и преподаватели" },
+        { title: "Коворкинг", desc: "Бронирование рабочих мест" }
+    ];
 
-<section class="footer-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-4 col-md-6">
-                <div class="footer-option">
-                    <div class="fo-logo">
-                        <a href="index.html">Система онлайн расписаний</a>
+    const container = document.getElementById('floatingContainer');
+    const colCount = 3;
+    
+    // Распределяем данные по колонкам и дублируем для зацикливания
+    const columns = [];
+    for(let i = 0; i < colCount; i++) {
+        const colData = floatingData.filter((_, idx) => idx % colCount === i);
+        columns.push(colData);
+    }
+
+    columns.forEach((colData, i) => {
+        const col = document.createElement('div');
+        col.className = 'flex flex-col gap-10 w-1/3 pt-16 pb-16 overflow-hidden';
+        col.style.opacity = i === 0 ? '0.08' : i === 1 ? '0.05' : '0.08';
+        
+        // Генерируем два одинаковых набора для seamless loop
+        const renderList = (data) => data.map(item => `
+            <div class="flex flex-col items-center text-center px-4">
+                <span class="text-3xl md:text-5xl font-black text-white leading-tight">${item.title}</span>
+                <span class="text-sm md:text-base text-gray-400 mt-1 font-medium">${item.desc}</span>
+            </div>
+        `).join('');
+        
+        col.innerHTML = renderList(colData) + renderList(colData);
+        container.appendChild(col);
+
+        // Анимация сверху вниз (бесконечно)
+        // Начальная позиция: сдвинут вверх на 50%, анимируем до 0 (движение вниз)
+        const height = col.offsetHeight;
+        gsap.set(col, { y: -height / 2 });
+        
+        const duration = 25 + i * 8; // Разная скорость для колонок
+        gsap.to(col, {
+            y: 0,
+            duration: duration,
+            ease: "none",
+            repeat: -1,
+            onRepeat: function() {
+                gsap.set(this.targets()[0], { y: -height / 2 });
+            }
+        });
+
+        // Легкое покачивание по X для органичности
+        gsap.to(col, {
+            x: "+=15",
+            duration: duration * 0.4,
+            yoyo: true,
+            repeat: -1,
+            ease: "sine.inOut"
+        });
+    });
+
+    // 2. Интерактивный виджет (Центр управления)
+    const features = [
+        {
+            title: "Live-обновление",
+            desc: "Данные из Google Sheets мгновенно транслируются на все подключенные экраны. Изменили таблицу — через 2 секунды информация уже на табло.",
+            icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>',
+            tags: ["Google API", "Real-time sync", "0 задержек"],
+            previewValue: "100%",
+            previewLabel: "Синхронизация",
+            barWidth: "100%",
+            bgClass: "from-indigo-500/5 to-transparent"
+        },
+        {
+            title: "Таймер звонков",
+            desc: "Автоматический расчет времени до конца урока или перемены. Адаптируется под любое расписание и автоматически переключает слайды.",
+            icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+            tags: ["Авто-расчет", "Звуковые сигналы", "Адаптивность"],
+            previewValue: "14:32",
+            previewLabel: "До звонка",
+            barWidth: "75%",
+            bgClass: "from-red-500/5 to-transparent"
+        },
+        {
+            title: "Погода и Время",
+            desc: "Интеграция актуального прогноза и точного серверного времени. Полезный виджет для комфорта посетителей и сотрудников.",
+            icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>',
+            tags: ["OpenWeather", "NTP Sync", "Локализация"],
+            previewValue: "+5°C",
+            previewLabel: "Кемерово",
+            barWidth: "60%",
+            bgClass: "from-blue-500/5 to-transparent"
+        },
+        {
+            title: "События и Анонсы",
+            desc: "Мгновенный вывод важных сообщений поверх основного контента. Идеально для экстренных уведомлений или праздников.",
+            icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>',
+            tags: ["Overlay", "Push-уведомления", "Приоритет"],
+            previewValue: "3",
+            previewLabel: "Новых анонса",
+            barWidth: "90%",
+            bgClass: "from-purple-500/5 to-transparent"
+        }
+    ];
+
+    let currentFeature = 0;
+    const els = {
+        title: document.getElementById('widgetTitle'),
+        desc: document.getElementById('widgetDesc'),
+        icon: document.getElementById('widgetIcon'),
+        tags: document.getElementById('widgetTags'),
+        previewValue: document.getElementById('previewValue'),
+        previewLabel: document.getElementById('previewLabel'),
+        previewBar: document.getElementById('previewBar'),
+        previewBg: document.getElementById('previewBg'),
+        dots: document.querySelectorAll('#features button')
+    };
+
+    function switchFeature(index) {
+        currentFeature = index;
+        const f = features[index];
+        
+        // Анимация исчезновения
+        gsap.to([els.title, els.desc, els.icon, els.tags, els.previewValue, els.previewLabel, els.previewBar], {
+            opacity: 0, y: 10, duration: 0.2, stagger: 0.02, onComplete: () => {
+                // Обновление контента
+                els.title.textContent = f.title;
+                els.desc.textContent = f.desc;
+                els.icon.innerHTML = f.icon;
+                els.previewValue.textContent = f.previewValue;
+                els.previewLabel.textContent = f.previewLabel;
+                els.previewBar.style.width = f.barWidth;
+                els.previewBg.className = `absolute inset-0 bg-gradient-to-br ${f.bgClass} transition-colors duration-500`;
+                
+                els.tags.innerHTML = f.tags.map(t => `<span class="px-3 py-1.5 rounded-lg bg-white/5 text-xs font-medium text-gray-400 border border-white/10">${t}</span>`).join('');
+                
+                // Анимация появления
+                gsap.to([els.title, els.desc, els.icon, els.tags, els.previewValue, els.previewLabel, els.previewBar], {
+                    opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: "power2.out"
+                });
+            }
+        });
+
+        // Обновление точек
+        els.dots.forEach((dot, i) => {
+            dot.className = i === index 
+                ? "w-2.5 h-2.5 rounded-full bg-indigo-500 transition-all hover:scale-125"
+                : "w-2.5 h-2.5 rounded-full bg-white/20 hover:bg-white/40 transition-all hover:scale-125";
+        });
+    }
+
+    window.switchFeature = switchFeature;
+
+    // Автопереключение при скролле внутри секции
+    ScrollTrigger.create({
+        trigger: "#features",
+        start: "top center",
+        end: "bottom center",
+        onUpdate: self => {
+            const idx = Math.min(Math.floor(self.progress * features.length), features.length - 1);
+            if (idx !== currentFeature) switchFeature(idx);
+        }
+    });
+
+})();
+</script>
+
+    <!-- Section 5: Pricing -->
+    <section class="section flex items-center justify-center relative" id="pricing">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-purple-950/20 to-[#0a0a0f]"></div>
+        <div class="relative z-10 px-6 max-w-6xl mx-auto w-full">
+            <div class="text-center mb-16">
+                <span class="text-purple-400 text-sm font-semibold tracking-widest uppercase" id="priceLabel">Тарифы</span>
+                <h2 class="text-4xl md:text-6xl font-black mt-4" id="priceTitle">Выберите ваш план</h2>
+                <p class="text-gray-400 mt-4 max-w-xl mx-auto">Прозрачные цены без скрытых платежей. Все тарифы включают базовую поддержку.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8" id="pricingGrid">
+                <!-- Basic -->
+                <div class="price-card" id="priceBasic">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-300">Базовый</h3>
+                        <p class="text-sm text-gray-500 mt-1">Для небольших школ</p>
                     </div>
-                    <ul>
-                        <li>г. Кемерово</li>
-                        <li>Разработка информационных систем на заказ</li>
+                    <div class="mb-8">
+                        <span class="text-5xl font-black">30 000</span>
+                        <span class="text-xl text-gray-400">₽</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            До 3 экранов
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Интеграция с Google Sheets
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Таймер звонков
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Погода и время
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Консультация при внедрении
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Техподдержка 3 мес.
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-500">
+                            <svg class="w-5 h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Выездные замеры
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-500">
+                            <svg class="w-5 h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Интеграция с 1С
+                        </li>
                     </ul>
-                    <div class="fo-social">
-                        <a href="https://ttttt.me/ftdt800"><i class="fab fa-telegram"></i></a>
+                    <button class="w-full btn-outline py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white transition-all" onclick="requestKP('basic')">Выбрать тариф</button>
+                </div>
+
+                <!-- Pro -->
+                <div class="price-card popular relative" id="pricePro">
+                    <div class="popular-badge">Популярный</div>
+                    <div class="mb-6 mt-2">
+                        <h3 class="text-xl font-bold text-white">Профессиональный</h3>
+                        <p class="text-sm text-gray-400 mt-1">Для средних учреждений</p>
+                    </div>
+                    <div class="mb-8">
+                        <span class="text-5xl font-black gradient-text">50 000</span>
+                        <span class="text-xl text-gray-400">₽</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            До 10 экранов
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Все возможности Базового
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Выездные замеры помещений
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Интеграция с 1С
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Индивидуальный дизайн
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            События и объявления
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Техподдержка 6 мес.
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-500">
+                            <svg class="w-5 h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Интеграция с кассой
+                        </li>
+                    </ul>
+                    <button class="w-full btn-primary py-3 rounded-xl text-sm font-medium text-white" onclick="requestKP('pro')">Выбрать тариф</button>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="price-card" id="priceEnterprise">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-300">Корпоративный</h3>
+                        <p class="text-sm text-gray-500 mt-1">Для крупных организаций</p>
+                    </div>
+                    <div class="mb-8">
+                        <span class="text-5xl font-black">100 000</span>
+                        <span class="text-xl text-gray-400">₽</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Неограниченное кол-во экранов
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Всё из Профессионального
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Интеграция с кассой/СКУД
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Выделенный сервер
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Приоритетная поддержка 12 мес.
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Обучение персонала
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            SLA 99.9%
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-300">
+                            <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            API для интеграций
+                        </li>
+                    </ul>
+                    <button class="w-full btn-outline py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white transition-all" onclick="requestKP('enterprise')">Выбрать тариф</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: Additional Benefits -->
+    <section class="section flex items-center justify-center relative" id="benefits">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-indigo-950/10 to-[#0a0a0f]"></div>
+        <div class="relative z-10 px-6 max-w-6xl mx-auto w-full">
+            <div class="text-center mb-16">
+                <span class="text-indigo-400 text-sm font-semibold tracking-widest uppercase" id="benLabel">Почему мы</span>
+                <h2 class="text-4xl md:text-6xl font-black mt-4" id="benTitle">Преимущества системы</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="benefit-card p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/30 transition-all duration-500 group text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-2">Быстрый старт</h3>
+                    <p class="text-sm text-gray-400">Запуск за 1 день. Не нужно обучать персонал — всё работает автоматически.</p>
+                </div>
+                <div class="benefit-card p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/30 transition-all duration-500 group text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-2">Надёжность</h3>
+                    <p class="text-sm text-gray-400">Работает 24/7 без перебоев. Данные не пропадут при отключении интернета.</p>
+                </div>
+                <div class="benefit-card p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/30 transition-all duration-500 group text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-2">Гибкость</h3>
+                    <p class="text-sm text-gray-400">Адаптация под любые требования. Школы, ВУЗы, бизнес — под каждый проект свой подход.</p>
+                </div>
+                <div class="benefit-card p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/30 transition-all duration-500 group text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-2">Экономия</h3>
+                    <p class="text-sm text-gray-400">Заменяет печатные расписания и информационные стенды. Окупается за 2 месяца.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 7: Statistics -->
+    <section class="relative min-h-screen bg-[#0a0a0f] overflow-hidden py-24" id="custom-features">
+    
+    <!-- Фоновые эффекты -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-1/3 right-1/4 w-80 h-80 bg-indigo-600/10 rounded-full blur-[100px] animate-pulse" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-600/5 rounded-full blur-[80px] animate-pulse" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Сетка на фоне -->
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 60px 60px;"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6">
+        
+        <!-- Заголовок -->
+        <div class="text-center mb-20">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-6">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Кастомная разработка
+            </div>
+            <h2 class="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6">
+                Нужна функция которой <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">нет?</span>
+            </h2>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                Мы реализуем любые идеи — от интеграции с внешними системами до уникальных интерфейсов. 
+                Опишите задачу, мы предложим решение.
+            </p>
+        </div>
+
+        <!-- Карточки кастомных функций -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-32">
+            
+            <!-- Карточка 1: Интеграции -->
+            <div class="group relative bg-white/[0.03] border border-white/[0.06] rounded-3xl p-8 hover:border-purple-500/30 transition-all duration-500 hover:bg-white/[0.05] hover:shadow-[0_0_60px_rgba(168,85,247,0.1)] overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10">
+                    <div class="w-20 h-20 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] transition-all duration-500">
+                        <svg class="w-10 h-10 text-purple-400" viewBox="0 0 64 64" fill="none">
+                            <rect x="4" y="8" width="24" height="16" rx="4" stroke="currentColor" stroke-width="2"/>
+                            <rect x="36" y="8" width="24" height="16" rx="4" stroke="currentColor" stroke-width="2"/>
+                            <path d="M28 16h8" stroke="currentColor" stroke-width="2" stroke-dasharray="2 2"/>
+                            <circle cx="16" cy="40" r="12" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="48" cy="40" r="12" stroke="currentColor" stroke-width="2"/>
+                            <path d="M28 40h8" stroke="currentColor" stroke-width="2"/>
+                            <path d="M16 24v4" stroke="currentColor" stroke-width="2"/>
+                            <path d="M48 24v4" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="16" cy="40" r="4" fill="currentColor" fill-opacity="0.3"/>
+                            <circle cx="48" cy="40" r="4" fill="currentColor" fill-opacity="0.3"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Интеграции</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">
+                        Подключим CRM, платёжные системы, мессенджеры и любые API. 1С, Битрикс, Telegram, WhatsApp — без ограничений.
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="text-xs px-2 py-1 rounded-md bg-purple-500/10 text-purple-400">REST</span>
+                        <span class="text-xs px-2 py-1 rounded-md bg-purple-500/10 text-purple-400">SOAP</span>
+                        <span class="text-xs px-2 py-1 rounded-md bg-purple-500/10 text-purple-400">GraphQL</span>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="footer-widget fw-links">
+
+            <!-- Карточка 2: Кастомный UI -->
+            <div class="group relative bg-white/[0.03] border border-white/[0.06] rounded-3xl p-8 hover:border-cyan-500/30 transition-all duration-500 hover:bg-white/[0.05] hover:shadow-[0_0_60px_rgba(6,182,212,0.1)] overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-cyan-500/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10">
+                    <div class="w-20 h-20 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] transition-all duration-500">
+                        <svg class="w-10 h-10 text-cyan-400" viewBox="0 0 64 64" fill="none">
+                            <rect x="8" y="4" width="48" height="32" rx="6" stroke="currentColor" stroke-width="2"/>
+                            <line x1="8" y1="16" x2="56" y2="16" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="16" cy="10" r="2" fill="#ef4444"/>
+                            <circle cx="22" cy="10" r="2" fill="#eab308"/>
+                            <circle cx="28" cy="10" r="2" fill="#22c55e"/>
+                            <rect x="12" y="20" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <rect x="32" y="20" width="8" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <rect x="44" y="20" width="8" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <rect x="12" y="42" width="12" height="4" rx="1" fill="currentColor" fill-opacity="0.4"/>
+                            <rect x="28" y="42" width="24" height="4" rx="1" fill="currentColor" fill-opacity="0.2"/>
+                            <rect x="12" y="50" width="20" height="4" rx="1" fill="currentColor" fill-opacity="0.3"/>
+                            <rect x="36" y="50" width="16" height="4" rx="1" fill="currentColor" fill-opacity="0.15"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Уникальный дизайн</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">
+                        Разработаем интерфейс под ваш брендбук. Кастомные дашборды, анимации, тёмная тема — всё под ваш стиль.
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="text-xs px-2 py-1 rounded-md bg-cyan-500/10 text-cyan-400">Figma</span>
+                        <span class="text-xs px-2 py-1 rounded-md bg-cyan-500/10 text-cyan-400">Motion</span>
+                        <span class="text-xs px-2 py-1 rounded-md bg-cyan-500/10 text-cyan-400">Dark Mode</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка 3: Аналитика -->
+            <div class="group relative bg-white/[0.03] border border-white/[0.06] rounded-3xl p-8 hover:border-pink-500/30 transition-all duration-500 hover:bg-white/[0.05] hover:shadow-[0_0_60px_rgba(236,72,153,0.1)] overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-pink-500/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10">
+                    <div class="w-20 h-20 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] transition-all duration-500">
+                        <svg class="w-10 h-10 text-pink-400" viewBox="0 0 64 64" fill="none">
+                            <path d="M8 56L8 8" stroke="currentColor" stroke-width="2"/>
+                            <path d="M8 56L56 56" stroke="currentColor" stroke-width="2"/>
+                            <path d="M16 48L16 32L24 32L24 48" stroke="currentColor" stroke-width="2" fill="currentColor" fill-opacity="0.1"/>
+                            <path d="M28 48L28 20L36 20L36 48" stroke="currentColor" stroke-width="2" fill="currentColor" fill-opacity="0.2"/>
+                            <path d="M40 48L40 12L48 12L48 48" stroke="currentColor" stroke-width="2" fill="currentColor" fill-opacity="0.3"/>
+                            <circle cx="20" cy="28" r="3" fill="currentColor" fill-opacity="0.5"/>
+                            <circle cx="32" cy="16" r="3" fill="currentColor" fill-opacity="0.5"/>
+                            <circle cx="44" cy="8" r="3" fill="currentColor" fill-opacity="0.5"/>
+                            <path d="M20 28L32 16L44 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Аналитика</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">
+                        Дашборды, отчёты, графики в реальном времени. Экспорт в PDF/Excel. Интеграция с Яндекс.Метрикой.
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="text-xs px-2 py-1 rounded-md bg-pink-500/10 text-pink-400">Charts</span>
+                        <span class="text-xs px-2 py-1 rounded-md bg-pink-500/10 text-pink-400">Reports</span>
+                        <span class="text-xs px-2 py-1 rounded-md bg-pink-500/10 text-pink-400">Export</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка 4: Мобильное приложение -->
+            <div class="group relative bg-white/[0.03] border border-white/[0.06] rounded-3xl p-8 hover:border-amber-500/30 transition-all duration-500 hover:bg-white/[0.05] hover:shadow-[0_0_60px_rgba(245,158,11,0.1)] overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10">
+                    <div class="w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all duration-500">
+                        <svg class="w-10 h-10 text-amber-400" viewBox="0 0 64 64" fill="none">
+                            <rect x="18" y="4" width="28" height="56" rx="8" stroke="currentColor" stroke-width="2"/>
+                            <line x1="18" y1="12" x2="46" y2="12" stroke="currentColor" stroke-width="2"/>
+                            <line x1="18" y1="52" x2="46" y2="52" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="32" cy="56" r="2" fill="currentColor"/>
+                            <rect x="22" y="16" width="20" height="32" rx="2" stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity="0.05"/>
+                            <rect x="26" y="20" width="12" height="8" rx="1" fill="currentColor" fill-opacity="0.3"/>
+                            <rect x="26" y="32" width="8" height="4" rx="1" fill="currentColor" fill-opacity="0.2"/>
+                            <rect x="26" y="40" width="12" height="4" rx="1" fill="currentColor" fill-opacity="0.15"/>
+                            <path d="M26 28h12" stroke="currentColor" stroke-width="1"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Мобильное приложение</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">
+                        PWA или нативное приложение для iOS/Android. Push-уведомления, офлайн-режим, сканер QR-кодов.
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="text-xs px-2 py-1 rounded-md bg-amber-500/10 text-amber-400">PWA</span>
+                        <span class="text-xs px-2 py-1 rounded-md bg-amber-500/10 text-amber-400">iOS</span>
+                        <span class="text-xs px-2 py-1 rounded-md bg-amber-500/10 text-amber-400">Android</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CTA -->
+        <div class="text-center mb-24">
+            <p class="text-lg text-gray-400 mb-6">Не нашли нужное? Опишите вашу задачу — мы реализуем.</p>
+            <a href="#contact" class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg hover:shadow-[0_0_40px_rgba(168,85,247,0.4)] hover:scale-105 transition-all duration-300 group">
+                Обсудить проект
+                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Бесконечная лента -->
+    <div class="relative overflow-hidden border-t border-b border-white/[0.05] py-12 bg-black/30">
+        <div class="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0a0a0f] to-transparent z-10"></div>
+        <div class="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#0a0a0f] to-transparent z-10"></div>
+        
+        <div class="flex animate-marquee" id="marqueeTrack">
+            <!-- 4 изображения × 3 повторения для бесшовности -->
+            <div class="flex gap-8 px-4 items-center">
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-purple-500/30 transition-all duration-300">
+                    <img src="/static/images/preview1.png" alt="Интерфейс школы" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-purple-900/40 to-purple-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-purple-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'4\' y=\'8\' width=\'56\' height=\'36\' rx=\'4\' stroke=\'currentColor\' stroke-width=\'2\'/><line x1=\'4\' y1=\'20\' x2=\'60\' y2=\'20\' stroke=\'currentColor\' stroke-width=\'2\'/><rect x=\'8\' y=\'24\' width=\'20\' height=\'16\' rx=\'2\' fill=\'currentColor\' fill-opacity=\'0.15\'/><rect x=\'32\' y=\'24\' width=\'24\' height=\'8\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.1\'/><rect x=\'32\' y=\'36\' width=\'16\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.1\'/><circle cx=\'18\' cy=\'54\' r=\'3\' fill=\'currentColor\' fill-opacity=\'0.3\'/></svg></div>'">
+                </div>
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-cyan-500/30 transition-all duration-300">
+                    <img src="/static/images/preview2.png" alt="Дашборд аналитики" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-cyan-900/40 to-cyan-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-cyan-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'4\' y=\'4\' width=\'56\' height=\'56\' rx=\'6\' stroke=\'currentColor\' stroke-width=\'2\'/><path d=\'M12 48V32L20 32V48\' fill=\'currentColor\' fill-opacity=\'0.2\' stroke=\'currentColor\' stroke-width=\'1.5\'/><path d=\'M28 48V24L36 24V48\' fill=\'currentColor\' fill-opacity=\'0.3\' stroke=\'currentColor\' stroke-width=\'1.5\'/><path d=\'M44 48V16L52 16V48\' fill=\'currentColor\' fill-opacity=\'0.4\' stroke=\'currentColor\' stroke-width=\'1.5\'/></svg></div>'">
+                </div>
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-pink-500/30 transition-all duration-300">
+                    <img src="/static/images/preview3.png" alt="Расписание на экране" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-pink-900/40 to-pink-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-pink-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'4\' y=\'8\' width=\'56\' height=\'40\' rx=\'4\' stroke=\'currentColor\' stroke-width=\'2\'/><line x1=\'4\' y1=\'16\' x2=\'60\' y2=\'16\' stroke=\'currentColor\' stroke-width=\'2\'/><rect x=\'8\' y=\'20\' width=\'12\' height=\'8\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.2\'/><rect x=\'24\' y=\'20\' width=\'32\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.15\'/><rect x=\'8\' y=\'32\' width=\'12\' height=\'8\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.15\'/><rect x=\'24\' y=\'32\' width=\'32\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.1\'/><rect x=\'8\' y=\'44\' width=\'48\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.08\'/></svg></div>'">
+                </div>
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-amber-500/30 transition-all duration-300">
+                    <img src="/static/images/preview4.png" alt="Мобильное приложение" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-amber-900/40 to-amber-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-amber-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'20\' y=\'4\' width=\'24\' height=\'56\' rx=\'8\' stroke=\'currentColor\' stroke-width=\'2\'/><line x1=\'20\' y1=\'12\' x2=\'44\' y2=\'12\' stroke=\'currentColor\' stroke-width=\'2\'/><rect x=\'24\' y=\'16\' width=\'16\' height=\'32\' rx=\'2\' fill=\'currentColor\' fill-opacity=\'0.15\' stroke=\'currentColor\' stroke-width=\'1.5\'/><circle cx=\'32\' cy=\'54\' r=\'2\' fill=\'currentColor\' fill-opacity=\'0.4\'/></svg></div>'">
+                </div>
+            </div>
+            <!-- Дублируем для бесшовности -->
+            <div class="flex gap-8 px-4 items-center">
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-purple-500/30 transition-all duration-300">
+                    <img src="/static/images/preview1.png" alt="Интерфейс школы" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-purple-900/40 to-purple-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-purple-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'4\' y=\'8\' width=\'56\' height=\'36\' rx=\'4\' stroke=\'currentColor\' stroke-width=\'2\'/><line x1=\'4\' y1=\'20\' x2=\'60\' y2=\'20\' stroke=\'currentColor\' stroke-width=\'2\'/><rect x=\'8\' y=\'24\' width=\'20\' height=\'16\' rx=\'2\' fill=\'currentColor\' fill-opacity=\'0.15\'/><rect x=\'32\' y=\'24\' width=\'24\' height=\'8\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.1\'/><rect x=\'32\' y=\'36\' width=\'16\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.1\'/><circle cx=\'18\' cy=\'54\' r=\'3\' fill=\'currentColor\' fill-opacity=\'0.3\'/></svg></div>'">
+                </div>
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-cyan-500/30 transition-all duration-300">
+                    <img src="/static/images/preview2.png" alt="Дашборд аналитики" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-cyan-900/40 to-cyan-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-cyan-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'4\' y=\'4\' width=\'56\' height=\'56\' rx=\'6\' stroke=\'currentColor\' stroke-width=\'2\'/><path d=\'M12 48V32L20 32V48\' fill=\'currentColor\' fill-opacity=\'0.2\' stroke=\'currentColor\' stroke-width=\'1.5\'/><path d=\'M28 48V24L36 24V48\' fill=\'currentColor\' fill-opacity=\'0.3\' stroke=\'currentColor\' stroke-width=\'1.5\'/><path d=\'M44 48V16L52 16V48\' fill=\'currentColor\' fill-opacity=\'0.4\' stroke=\'currentColor\' stroke-width=\'1.5\'/></svg></div>'">
+                </div>
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-pink-500/30 transition-all duration-300">
+                    <img src="/static/images/preview3.png" alt="Расписание на экране" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-pink-900/40 to-pink-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-pink-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'4\' y=\'8\' width=\'56\' height=\'40\' rx=\'4\' stroke=\'currentColor\' stroke-width=\'2\'/><line x1=\'4\' y1=\'16\' x2=\'60\' y2=\'16\' stroke=\'currentColor\' stroke-width=\'2\'/><rect x=\'8\' y=\'20\' width=\'12\' height=\'8\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.2\'/><rect x=\'24\' y=\'20\' width=\'32\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.15\'/><rect x=\'8\' y=\'32\' width=\'12\' height=\'8\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.15\'/><rect x=\'24\' y=\'32\' width=\'32\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.1\'/><rect x=\'8\' y=\'44\' width=\'48\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.08\'/></svg></div>'">
+                </div>
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-amber-500/30 transition-all duration-300">
+                    <img src="/static/images/preview4.png" alt="Мобильное приложение" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-amber-900/40 to-amber-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-amber-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'20\' y=\'4\' width=\'24\' height=\'56\' rx=\'8\' stroke=\'currentColor\' stroke-width=\'2\'/><line x1=\'20\' y1=\'12\' x2=\'44\' y2=\'12\' stroke=\'currentColor\' stroke-width=\'2\'/><rect x=\'24\' y=\'16\' width=\'16\' height=\'32\' rx=\'2\' fill=\'currentColor\' fill-opacity=\'0.15\' stroke=\'currentColor\' stroke-width=\'1.5\'/><circle cx=\'32\' cy=\'54\' r=\'2\' fill=\'currentColor\' fill-opacity=\'0.4\'/></svg></div>'">
+                </div>
+            </div>
+            <!-- Третье дублирование для широких экранов -->
+            <div class="flex gap-8 px-4 items-center">
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-purple-500/30 transition-all duration-300">
+                    <img src="/static/images/preview1.png" alt="Интерфейс школы" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-purple-900/40 to-purple-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-purple-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'4\' y=\'8\' width=\'56\' height=\'36\' rx=\'4\' stroke=\'currentColor\' stroke-width=\'2\'/><line x1=\'4\' y1=\'20\' x2=\'60\' y2=\'20\' stroke=\'currentColor\' stroke-width=\'2\'/><rect x=\'8\' y=\'24\' width=\'20\' height=\'16\' rx=\'2\' fill=\'currentColor\' fill-opacity=\'0.15\'/><rect x=\'32\' y=\'24\' width=\'24\' height=\'8\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.1\'/><rect x=\'32\' y=\'36\' width=\'16\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.1\'/><circle cx=\'18\' cy=\'54\' r=\'3\' fill=\'currentColor\' fill-opacity=\'0.3\'/></svg></div>'">
+                </div>
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-cyan-500/30 transition-all duration-300">
+                    <img src="/static/images/preview2.png" alt="Дашборд аналитики" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-cyan-900/40 to-cyan-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-cyan-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'4\' y=\'4\' width=\'56\' height=\'56\' rx=\'6\' stroke=\'currentColor\' stroke-width=\'2\'/><path d=\'M12 48V32L20 32V48\' fill=\'currentColor\' fill-opacity=\'0.2\' stroke=\'currentColor\' stroke-width=\'1.5\'/><path d=\'M28 48V24L36 24V48\' fill=\'currentColor\' fill-opacity=\'0.3\' stroke=\'currentColor\' stroke-width=\'1.5\'/><path d=\'M44 48V16L52 16V48\' fill=\'currentColor\' fill-opacity=\'0.4\' stroke=\'currentColor\' stroke-width=\'1.5\'/></svg></div>'">
+                </div>
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-pink-500/30 transition-all duration-300">
+                    <img src="/static/images/preview3.png" alt="Расписание на экране" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-pink-900/40 to-pink-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-pink-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'4\' y=\'8\' width=\'56\' height=\'40\' rx=\'4\' stroke=\'currentColor\' stroke-width=\'2\'/><line x1=\'4\' y1=\'16\' x2=\'60\' y2=\'16\' stroke=\'currentColor\' stroke-width=\'2\'/><rect x=\'8\' y=\'20\' width=\'12\' height=\'8\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.2\'/><rect x=\'24\' y=\'20\' width=\'32\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.15\'/><rect x=\'8\' y=\'32\' width=\'12\' height=\'8\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.15\'/><rect x=\'24\' y=\'32\' width=\'32\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.1\'/><rect x=\'8\' y=\'44\' width=\'48\' height=\'4\' rx=\'1\' fill=\'currentColor\' fill-opacity=\'0.08\'/></svg></div>'">
+                </div>
+                <div class="flex-shrink-0 w-64 h-40 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl hover:border-amber-500/30 transition-all duration-300">
+                    <img src="/static/images/preview4.png" alt="Мобильное приложение" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-amber-900/40 to-amber-800/20 flex items-center justify-center\'><svg class=\'w-16 h-16 text-amber-500/40\' viewBox=\'0 0 64 64\' fill=\'none\'><rect x=\'20\' y=\'4\' width=\'24\' height=\'56\' rx=\'8\' stroke=\'currentColor\' stroke-width=\'2\'/><line x1=\'20\' y1=\'12\' x2=\'44\' y2=\'12\' stroke=\'currentColor\' stroke-width=\'2\'/><rect x=\'24\' y=\'16\' width=\'16\' height=\'32\' rx=\'2\' fill=\'currentColor\' fill-opacity=\'0.15\' stroke=\'currentColor\' stroke-width=\'1.5\'/><circle cx=\'32\' cy=\'54\' r=\'2\' fill=\'currentColor\' fill-opacity=\'0.4\'/></svg></div>'">
                 </div>
             </div>
         </div>
-        <div class="copyright-text">
-            <p>Система онлайн расписаний &copy; 2024 - <script>document.write(new Date().getFullYear());</script></p> 
-            <p style="font-size: 9px;">Разработка: <a href="https://ttttt.me/ftdt800" target="_blank">ROMAN VOLNOV</a></p>
-        </div>
     </div>
+
+    <style>
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-33.333%);
+            }
+        }
+        .animate-marquee {
+            animation: marquee 30s linear infinite;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
+    </style>
 </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="js/jquery-3.3.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/jquery.magnific-popup.min.js"></script>
-    <script src="js/mixitup.min.js"></script>
-    <script src="js/owl.carousel.min.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/app.js" defer></script>
-	<script src="js/rain.js" defer></script>
+    <!-- Section 8: Testimonials -->
+    <section class="section flex items-center justify-center relative" id="testimonials">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-indigo-950/10 to-[#0a0a0f]"></div>
+        <div class="relative z-10 px-6 max-w-6xl mx-auto w-full">
+            <div class="text-center mb-16">
+                <span class="text-indigo-400 text-sm font-semibold tracking-widest uppercase" id="testLabel">Отзывы</span>
+                <h2 class="text-4xl md:text-6xl font-black mt-4" id="testTitle">Что говорят клиенты</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="testimonial-card p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/20 transition-all duration-500">
+                    <div class="flex items-center gap-1 mb-4">
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-4">"Система полностью изменила подход к информированию в нашей школе. Родители довольны, дети знают расписание."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 font-bold text-sm">АС</div>
+                        <div>
+                            <p class="text-sm font-semibold">Анна Владимировна</p>
+                            <p class="text-xs text-gray-500">Директор Школы №7</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 9: FAQ -->
+    <section class="section flex items-center justify-center relative" id="faq">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-purple-950/10 to-[#0a0a0f]"></div>
+        <div class="relative z-10 px-6 max-w-4xl mx-auto w-full">
+            <div class="text-center mb-16">
+                <span class="text-purple-400 text-sm font-semibold tracking-widest uppercase" id="faqLabel">FAQ</span>
+                <h2 class="text-4xl md:text-6xl font-black mt-4" id="faqTitle">Частые вопросы</h2>
+            </div>
+
+            <div class="space-y-4" id="faqList">
+                <div class="faq-item border border-white/5 rounded-2xl overflow-hidden hover:border-indigo-500/20 transition-all duration-300">
+                    <button class="faq-btn w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                        <span class="font-semibold">Как быстро можно запустить систему?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6 hidden">
+                        <p class="text-sm text-gray-400">Средний срок запуска — 30 рабочих дней. Мы настраиваем подключение к вашим таблицам, размещаем экраны и всё готово к работе.</p>
+                    </div>
+                </div>
+                <div class="faq-item border border-white/5 rounded-2xl overflow-hidden hover:border-indigo-500/20 transition-all duration-300">
+                    <button class="faq-btn w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                        <span class="font-semibold">Нужно ли специальное оборудование?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6 hidden">
+                        <p class="text-sm text-gray-400">Подойдут любые телевизоры, мониторы или информационные киоски. Мы поможем подобрать оборудование под ваши задачи и бюджет.</p>
+                    </div>
+                </div>
+                <div class="faq-item border border-white/5 rounded-2xl overflow-hidden hover:border-indigo-500/20 transition-all duration-300">
+                    <button class="faq-btn w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                        <span class="font-semibold">Что если пропадёт интернет?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6 hidden">
+                        <p class="text-sm text-gray-400">Система кэширует последние данные и продолжает работать автономно. При восстановлении связи — автоматически обновляется.</p>
+                    </div>
+                </div>
+                <div class="faq-item border border-white/5 rounded-2xl overflow-hidden hover:border-indigo-500/20 transition-all duration-300">
+                    <button class="faq-btn w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                        <span class="font-semibold">Можно ли настроить дизайн под наш бренд?</span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6 hidden">
+                        <p class="text-sm text-gray-400">Да! В тарифах «Профессиональный» и «Корпоративный» доступен индивидуальный дизайн с вашим логотипом, цветами и фирменным стилем.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 10: CTA / Contact -->
+    <section class="section flex items-center justify-center relative" id="contact">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-indigo-950/30 to-[#0a0a0f]"></div>
+        <!-- Decorative elements -->
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
+        
+        <div class="relative z-10 px-6 max-w-4xl mx-auto w-full text-center">
+            <div class="mb-16">
+                <span class="text-indigo-400 text-sm font-semibold tracking-widest uppercase" id="ctaLabel">Начать</span>
+                <h2 class="text-4xl md:text-6xl lg:text-7xl font-black mt-4 mb-6" id="ctaTitle">
+                    Готовы к<br><span class="gradient-text">цифровизации?</span>
+                </h2>
+                <p class="text-gray-400 text-lg max-w-xl mx-auto mb-12">Запросите коммерческое предложение и получите бесплатную консультацию по внедрению системы</p>
+            </div>
+
+            <!-- CTA Button -->
+            <div class="mb-16">
+                <a href="https://ttttt.me/ftdt800" target="_blank" class="pulse-btn inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xl font-bold px-12 py-6 rounded-3xl hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 hover:scale-105">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    Запросить КП
+                </a>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="grid md:grid-cols-3 gap-8 mb-16">
+                <div class="contact-card p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/20 transition-all duration-300 group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold mb-1">Email</h4>
+                    <p class="text-sm text-gray-400">ftdt800@gmail.com</p>
+                </div>
+                <div class="contact-card p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/20 transition-all duration-300 group cursor-pointer" onclick="window.open('https://ttttt.me/ftdt800', '_blank')">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold mb-1">Telegram</h4>
+                    <p class="text-sm text-gray-400">@ftdt800</p>
+                </div>
+                <div class="contact-card p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-indigo-500/20 transition-all duration-300 group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold mb-1">Город</h4>
+                    <p class="text-sm text-gray-400">г. Кемерово</p>
+                </div>
+            </div>
+
+            <!-- Developer -->
+            <div class="flex items-center justify-center gap-3 text-gray-500 text-sm">
+                <span>Разработка:</span>
+                <a href="https://ttttt.me/ftdt800" target="_blank" class="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">ROMAN VOLNOV</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8 px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <span class="text-sm text-gray-500">Система онлайн расписаний © <script>document.write(new Date().getFullYear());</script></span>
+            </div>
+            <div class="flex items-center gap-6 text-sm text-gray-500">
+                <a href="https://ttttt.me/ftdt800" target="_blank" class="hover:text-indigo-400 transition-colors">Telegram</a>
+                <span>г. Кемерово</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger);
+
+        // ==================== PROGRESS BAR ====================
+        const progressFill = document.getElementById('progressFill');
+        const progressDot = document.getElementById('progressDot');
+        const progressTrack = document.getElementById('progressTrack');
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            
+            if (progressFill) progressFill.style.height = progress + '%';
+            if (progressDot) progressDot.style.top = progress + '%';
+        });
+
+        // ==================== NAVIGATION ====================
+        const mainNav = document.getElementById('mainNav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                mainNav.style.background = 'rgba(10,10,15,0.9)';
+                mainNav.style.backdropFilter = 'blur(20px)';
+                mainNav.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            } else {
+                mainNav.style.background = 'transparent';
+                mainNav.style.backdropFilter = 'none';
+                mainNav.style.borderBottom = 'none';
+            }
+        });
+
+        // Mobile menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.remove('hidden');
+            });
+        }
+        if (mobileMenuClose) {
+            mobileMenuClose.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        }
+
+        function closeMobileMenu() {
+            if (mobileMenu) mobileMenu.classList.add('hidden');
+        }
+
+        // ==================== SECTION 1: HERO ====================
+        // Animate hero elements on load
+        const heroTl = gsap.timeline();
+        heroTl
+            .from('#heroBadge', { opacity: 0, y: 30, duration: 0.8, ease: 'power3.out' })
+            .from('#heroTitle', { opacity: 0, y: 50, duration: 1, ease: 'power3.out' }, '-=0.4')
+            .from('#heroSubtitle', { opacity: 0, y: 30, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+            .from('#heroButtons', { opacity: 0, y: 30, duration: 0.8, ease: 'power3.out' }, '-=0.4')
+            .from('#scrollIndicator', { opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=0.3');
+
+        // Parallax on hero background
+        gsap.to('#heroBg', {
+            yPercent: 30,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: '#hero',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: true
+            }
+        });
+
+        // Scroll indicator fade out
+        gsap.to('#scrollIndicator', {
+            opacity: 0,
+            scrollTrigger: {
+                trigger: '#hero',
+                start: '60% top',
+                end: 'bottom top',
+                scrub: true
+            }
+        });
+
+        // ==================== SECTION 2: HOW IT WORKS ====================
+        // Animate diagram elements
+        gsap.from('#hwLabel', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#how-it-works', start: '20% center', toggleActions: 'play none none reverse' }
+        });
+        gsap.from('#hwTitle', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#how-it-works', start: '25% center', toggleActions: 'play none none reverse' }
+        });
+
+        // Animate steps sequentially
+        const hwSteps = document.querySelectorAll('.hw-step');
+        hwSteps.forEach((step, i) => {
+            gsap.from(step, {
+                opacity: 0, scale: 0.8, y: 40,
+                scrollTrigger: {
+                    trigger: '#hwDiagram',
+                    start: `${20 + i * 15}% center`,
+                    end: `${30 + i * 15}% center`,
+                    toggleActions: 'play none none reverse'
+                },
+                duration: 0.6,
+                ease: 'power3.out'
+            });
+        });
+
+        // Animate arrows
+        const hwArrows = document.querySelectorAll('.hw-arrow');
+        hwArrows.forEach((arrow, i) => {
+            gsap.from(arrow, {
+                opacity: 0, x: -20,
+                scrollTrigger: {
+                    trigger: '#hwDiagram',
+                    start: `${30 + i * 15}% center`,
+                    toggleActions: 'play none none reverse'
+                },
+                duration: 0.6,
+                ease: 'power3.out'
+            });
+        });
+
+        // ==================== SECTION 3: USE CASES ====================
+        gsap.from('#ucLabel', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#use-cases', start: '20% center', toggleActions: 'play none none reverse' }
+        });
+        gsap.from('#ucTitle', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#use-cases', start: '25% center', toggleActions: 'play none none reverse' }
+        });
+
+        function switchMockup(tab) {
+            // Update tabs
+            document.querySelectorAll('.uc-tab').forEach(t => {
+                t.classList.remove('border-indigo-500/30', 'border-amber-500/30', 'border-rose-500/30');
+                t.classList.add('border-white/5');
+            });
+            const activeTab = document.querySelector(`.uc-tab[data-tab="${tab}"]`);
+            if (activeTab) {
+                const colors = { school: 'border-indigo-500/30', cafe: 'border-amber-500/30', uni: 'border-rose-500/30' };
+                activeTab.classList.remove('border-white/5');
+                activeTab.classList.add(colors[tab]);
+            }
+
+            // Update mockup
+            document.querySelectorAll('.mockup-content').forEach(c => c.classList.remove('active'));
+            const mockupMap = { school: 'mockupSchool', cafe: 'mockupCafe', uni: 'mockupUni' };
+            const target = document.getElementById(mockupMap[tab]);
+            if (target) target.classList.add('active');
+        }
+
+        // Auto-rotate mockup on scroll
+        ScrollTrigger.create({
+            trigger: '#use-cases',
+            start: '30% center',
+            end: '80% center',
+            onUpdate: (self) => {
+                const progress = self.progress;
+                if (progress < 0.33) switchMockup('school');
+                else if (progress < 0.66) switchMockup('cafe');
+                else switchMockup('uni');
+            }
+        });
+
+        // ==================== SECTION 4: FEATURES ====================
+        gsap.from('#featLabel', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#features', start: '15% center', toggleActions: 'play none none reverse' }
+        });
+        gsap.from('#featTitle', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#features', start: '20% center', toggleActions: 'play none none reverse' }
+        });
+
+        // Feature cards stagger
+        gsap.from('.feature-card', {
+            opacity: 0, y: 40, scale: 0.9,
+            scrollTrigger: { trigger: '#featureGrid', start: '20% center', toggleActions: 'play none none reverse' },
+            stagger: 0.1,
+            duration: 0.6,
+            ease: 'power3.out'
+        });
+
+        // Floating labels
+        const floatingLabelsData = [
+            { text: 'Интеграция с 1С', desc: 'Автоматизация процессов' },
+            { text: 'Больница — расписание врачей', desc: 'Запись на приём' },
+            { text: 'Фитнес-клуб — расписание тренировок', desc: 'Групповые и личные' },
+            { text: 'Бизнес-центр — навигация', desc: 'Карта этажей' },
+            { text: 'Ресторан — меню и акции', desc: 'Цифровое меню' },
+            { text: 'Кинотеатр — расписание сеансов', desc: 'Афиша фильмов' },
+            { text: 'Автовокзал — расписание рейсов', desc: 'Табло отправления' },
+            { text: 'Поликлиника — запись к врачу', desc: 'Электронная очередь' },
+            { text: 'ТРЦ — карта и события', desc: 'Навигация по моллу' },
+            { text: 'Отель — расписание мероприятий', desc: 'Конференц-залы' },
+            { text: 'Библиотека — график работы', desc: 'Расписание залов' },
+            { text: 'Спортивная школа — тренировки', desc: 'Расписание секций' },
+            { text: 'Музей — экскурсии', desc: 'Расписание туров' },
+            { text: 'Конгресс-холл — расписание', desc: 'Конференции и ивенты' },
+            { text: 'Кофейня — меню дня', desc: 'Специальные предложения' },
+            { text: 'Барбершоп — расписание мастеров', desc: 'Запись онлайн' },
+            { text: 'Автосервис — запись на ТО', desc: 'Управление очередью' },
+            { text: 'Детский сад — меню и занятия', desc: 'Информация для родителей' },
+            { text: 'Языковая школа — расписание', desc: 'Группы и преподаватели' },
+            { text: 'Коворкинг — бронирование мест', desc: 'Управление пространством' },
+        ];
+
+        const floatingContainer = document.getElementById('floatingLabelsContainer');
+        floatingLabelsData.forEach((item, i) => {
+            const label = document.createElement('div');
+            label.className = 'floating-label';
+            label.innerHTML = `${item.text}<small>${item.desc}</small>`;
+            
+            const xPos = 5 + Math.random() * 85;
+            const yPos = 5 + Math.random() * 85;
+            const delay = Math.random() * 20;
+            const duration = 25 + Math.random() * 15;
+            const drift = (Math.random() - 0.5) * 40;
+            
+            label.style.left = xPos + '%';
+            label.style.top = yPos + '%';
+            label.style.animationDelay = delay + 's';
+            
+            floatingContainer.appendChild(label);
+
+            // Animate floating
+            gsap.to(label, {
+                y: '+=' + (100 + Math.random() * 200),
+                x: '+=' + drift,
+                duration: duration,
+                delay: delay,
+                repeat: -1,
+                ease: 'none',
+                modifiers: {
+                    y: gsap.utils.unitize(y => {
+                        const containerH = floatingContainer.offsetHeight;
+                        return ((parseFloat(y) % (containerH + 200)) - 100) + 'px';
+                    })
+                }
+            });
+        });
+
+        // Day/Night toggle
+        let currentMode = 'day';
+        function setDayNight(mode) {
+            currentMode = mode;
+            const bg = document.getElementById('dayNightBg');
+            const timerWidget = document.getElementById('timerWidget');
+            const weatherWidget = document.getElementById('weatherWidget');
+            const weatherIcon = document.getElementById('weatherIcon');
+            const weatherTemp = document.getElementById('weatherTemp');
+            const weatherDesc = document.getElementById('weatherDesc');
+            const currentLesson = document.getElementById('currentLesson');
+            
+            document.querySelectorAll('.day-night-btn').forEach(btn => {
+                if (btn.dataset.mode === mode) {
+                    btn.classList.add('bg-indigo-500/20', 'text-indigo-300', 'border', 'border-indigo-500/30');
+                    btn.classList.remove('text-gray-400');
+                } else {
+                    btn.classList.remove('bg-indigo-500/20', 'text-indigo-300', 'border', 'border-indigo-500/30');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+
+            if (mode === 'night') {
+                bg.style.background = 'linear-gradient(to bottom, #0a0a0f 0%, #1a1040 50%, #0a0a0f 100%)';
+                if (weatherIcon) weatherIcon.textContent = '';
+                if (weatherTemp) weatherTemp.textContent = '-2°C';
+                if (weatherDesc) weatherDesc.textContent = 'Ночь, ясно';
+                if (currentLesson) currentLesson.textContent = 'Ночной дежурный';
+                if (timerWidget) timerWidget.style.background = 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(59,130,246,0.05))';
+            } else {
+                bg.style.background = 'linear-gradient(to bottom, #0a0a0f 0%, #1e1b4b 50%, #0a0a0f 100%)';
+                if (weatherIcon) weatherIcon.textContent = '☀️';
+                if (weatherTemp) weatherTemp.textContent = '+5°C';
+                if (weatherDesc) weatherDesc.textContent = 'Ясно, облачно';
+                if (currentLesson) currentLesson.textContent = 'Математика';
+                if (timerWidget) timerWidget.style.background = 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(167,139,250,0.1))';
+            }
+        }
+
+        // ==================== SECTION 5: PRICING ====================
+        gsap.from('#priceLabel', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#pricing', start: '15% center', toggleActions: 'play none none reverse' }
+        });
+        gsap.from('#priceTitle', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#pricing', start: '20% center', toggleActions: 'play none none reverse' }
+        });
+
+        // Zoom-in effect for price cards
+        const priceCards = ['#priceBasic', '#pricePro', '#priceEnterprise'];
+        priceCards.forEach((id, i) => {
+            gsap.from(id, {
+                opacity: 0, scale: 0.5, y: 100,
+                scrollTrigger: {
+                    trigger: '#pricingGrid',
+                    start: `${15 + i * 15}% center`,
+                    toggleActions: 'play none none reverse'
+                },
+                duration: 0.8,
+                ease: 'power3.out'
+            });
+        });
+
+        // Price card hover - change background
+        const body = document.body;
+        const priceCardElements = document.querySelectorAll('.price-card');
+        const bgColors = {
+            priceBasic: 'linear-gradient(to bottom, #0a0a0f, #0d1a0d, #0a0a0f)',
+            pricePro: 'linear-gradient(to bottom, #0a0a0f, #1a0d1a, #0a0a0f)',
+            priceEnterprise: 'linear-gradient(to bottom, #0a0a0f, #0d0d1a, #0a0a0f)'
+        };
+
+        priceCardElements.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const color = bgColors[card.id];
+                if (color) body.style.background = color;
+            });
+            card.addEventListener('mouseleave', () => {
+                body.style.background = '#0a0a0f';
+            });
+        });
+
+        // ==================== SECTION 6: BENEFITS ====================
+        gsap.from('#benLabel', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#benefits', start: '15% center', toggleActions: 'play none none reverse' }
+        });
+        gsap.from('#benTitle', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#benefits', start: '20% center', toggleActions: 'play none none reverse' }
+        });
+
+        gsap.from('.benefit-card', {
+            opacity: 0, y: 50, scale: 0.9,
+            scrollTrigger: { trigger: '#benefits .grid', start: '20% center', toggleActions: 'play none none reverse' },
+            stagger: 0.15,
+            duration: 0.6,
+            ease: 'power3.out'
+        });
+
+        // ==================== SECTION 7: STATISTICS ====================
+        gsap.from('#statLabel', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#stats', start: '15% center', toggleActions: 'play none none reverse' }
+        });
+        gsap.from('#statTitle', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#stats', start: '20% center', toggleActions: 'play none none reverse' }
+        });
+
+        // Animate numbers
+        function animateNumber(elementId, target, suffix = '') {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            
+            const obj = { val: 0 };
+            gsap.to(obj, {
+                val: target,
+                duration: 2,
+                ease: 'power2.out',
+                scrollTrigger: {
+                    trigger: `#${elementId}`,
+                    start: '80% center',
+                    toggleActions: 'play none none reverse'
+                },
+                onUpdate: () => {
+                    el.textContent = Math.round(obj.val) + suffix;
+                }
+            });
+        }
+
+        animateNumber('stat1', 15, '+');
+        animateNumber('stat2', 48, '');
+        animateNumber('stat3', 5, '');
+        animateNumber('stat4', 1200, '+');
+
+        // Timeline items
+        gsap.utils.toArray('.timeline-item').forEach((item, i) => {
+            gsap.to(item, {
+                opacity: 1, x: 0,
+                scrollTrigger: {
+                    trigger: item,
+                    start: '80% center',
+                    toggleActions: 'play none none reverse'
+                },
+                duration: 0.6,
+                delay: i * 0.2,
+                ease: 'power3.out'
+            });
+        });
+
+        // ==================== SECTION 8: TESTIMONIALS ====================
+        gsap.from('#testLabel', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#testimonials', start: '15% center', toggleActions: 'play none none reverse' }
+        });
+        gsap.from('#testTitle', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#testimonials', start: '20% center', toggleActions: 'play none none reverse' }
+        });
+
+        gsap.from('.testimonial-card', {
+            opacity: 0, y: 50, scale: 0.9,
+            scrollTrigger: { trigger: '#testimonials .grid', start: '20% center', toggleActions: 'play none none reverse' },
+            stagger: 0.15,
+            duration: 0.6,
+            ease: 'power3.out'
+        });
+
+        // ==================== SECTION 9: FAQ ====================
+        gsap.from('#faqLabel', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#faq', start: '15% center', toggleActions: 'play none none reverse' }
+        });
+        gsap.from('#faqTitle', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#faq', start: '20% center', toggleActions: 'play none none reverse' }
+        });
+
+        function toggleFaq(btn) {
+            const content = btn.nextElementSibling;
+            const arrow = btn.querySelector('svg');
+            const isOpen = !content.classList.contains('hidden');
+            
+            // Close all others
+            document.querySelectorAll('.faq-content').forEach(c => c.classList.add('hidden'));
+            document.querySelectorAll('.faq-btn svg').forEach(a => a.style.transform = 'rotate(0deg)');
+            
+            if (!isOpen) {
+                content.classList.remove('hidden');
+                arrow.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // ==================== SECTION 10: CTA ====================
+        gsap.from('#ctaLabel', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#contact', start: '15% center', toggleActions: 'play none none reverse' }
+        });
+        gsap.from('#ctaTitle', {
+            opacity: 0, y: 30,
+            scrollTrigger: { trigger: '#contact', start: '20% center', toggleActions: 'play none none reverse' }
+        });
+
+        gsap.from('.contact-card', {
+            opacity: 0, y: 40, scale: 0.9,
+            scrollTrigger: { trigger: '#contact .grid', start: '30% center', toggleActions: 'play none none reverse' },
+            stagger: 0.15,
+            duration: 0.6,
+            ease: 'power3.out'
+        });
+
+        // ==================== UTILITY ====================
+        function requestKP(plan) {
+            const messages = {
+                basic: 'Интересует тариф Базовый (30 000 ₽)',
+                pro: 'Интересует тариф Профессиональный (50 000 ₽)',
+                enterprise: 'Интересует тариф Корпоративный (100 000 ₽)'
+            };
+            const url = `https://ttttt.me/ftdt800?text=${encodeURIComponent(messages[plan] || 'Запрос КП')}`;
+            window.open(url, '_blank');
+        }
+
+        // Update server time
+        function updateServerTime() {
+            const el = document.getElementById('serverTime');
+            if (el) {
+                const now = new Date();
+                el.textContent = now.toLocaleTimeString('ru-RU');
+            }
+        }
+        setInterval(updateServerTime, 1000);
+        updateServerTime();
+
+        // Update timer
+        function updateTimer() {
+            const el = document.getElementById('timerDisplay');
+            if (el) {
+                const now = new Date();
+                const minutes = 59 - now.getMinutes();
+                const seconds = 59 - now.getSeconds();
+                el.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
+
